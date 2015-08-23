@@ -4,6 +4,10 @@
 *.obj
 *.elf
 
+# Compiled Object files
+*.slo
+*.lo
+
 # Precompiled Headers
 *.gch
 *.pch
@@ -14,11 +18,16 @@
 *.la
 *.lo
 
-# Shared objects (inc. Windows DLLs)
-*.dll
+# Compiled Dynamic libraries
 *.so
-*.so.*
 *.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
 
 # Executables
 *.exe
@@ -30,3 +39,11 @@
 
 # Debug files
 *.dSYM/
+
+#CMake
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
