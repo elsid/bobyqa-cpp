@@ -8,7 +8,7 @@
 namespace {
 
 void print_array(const std::size_t size, const double *values) {
-    std::cout << size;
+    std::cout << '[' << size << ']';
     std::for_each(values, values + size, [&] (double value) {
         std::cout << ' ' << value;
     });
