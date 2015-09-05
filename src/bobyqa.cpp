@@ -4,11 +4,13 @@
 
 #include <bobyqa.h>
 
+namespace {
+
 struct BobyqaError : std::runtime_error {
     BobyqaError(const std::string& message) : std::runtime_error(message) {}
 };
 
-static void update(
+void update(
     const long n,
     const long npt,
     double *bmat,
@@ -141,7 +143,7 @@ static void update(
     }
 }
 
-static void trsbox(
+void trsbox(
     const long n,
     const long npt,
     const double *xpt,
@@ -707,7 +709,7 @@ L210:
 }
 
 template <class Function>
-static void rescue(
+void rescue(
     const Function &function,
     const long n,
     const long npt,
@@ -1322,7 +1324,7 @@ L350:
 }
 
 template <class Function>
-static void prelim(
+void prelim(
     const Function &function,
     const long n,
     const long npt,
@@ -1574,7 +1576,7 @@ L50:
 
 }
 
-static void altmov(
+void altmov(
     const long n,
     const long npt,
     const double *xpt,
@@ -2010,7 +2012,7 @@ L200:
 }
 
 template <class Function>
-static double bobyqb(
+double bobyqb(
     const Function &function,
     const long n,
     const long npt,
@@ -3098,7 +3100,7 @@ L720:
 }
 
 template <class Function>
-static double bobyqa_impl(const Function &function, long n, long npt, double *x,
+double bobyqa_impl(const Function &function, long n, long npt, double *x,
         const double *xl, const double *xu, double rhobeg, double rhoend,
         long maxfun, double *w) {
     /* System generated locals */
@@ -3236,6 +3238,8 @@ static double bobyqa_impl(const Function &function, long n, long npt, double *x,
     //L40:
     ;
 }
+
+} // namespace
 
 double bobyqa(BobyqaFunction function, long n, long npt, double *x,
         const double *xl, const double *xu, double rhobeg, double rhoend,
