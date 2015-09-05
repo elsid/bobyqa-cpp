@@ -1,7 +1,13 @@
 #ifndef BOBYQA_H
 #define BOBYQA_H
 
-typedef double (*Function)(long n, const double *x);
+typedef double (*BobyqaFunction)(long n, const double *x);
+typedef double (*BobyqaClosureFunction)(void *data, long n, const double *x);
+
+typedef struct {
+    void *data;
+    BobyqaClosureFunction function;
+} BobyqaClosure;
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +43,11 @@ extern "C" {
  * The array W will be used for working space. Its length must be at least
  *   (NPT+5)*(NPT+N)+3*N*(N+5)/2. */
 
-double bobyqa(const Function function, long n, long npt, double *x,
+double bobyqa(BobyqaFunction function, long n, long npt, double *x,
+    const double *xl, const double *xu, double rhobeg, double rhoend,
+    long maxfun, double *w);
+
+double bobyqa_closure(BobyqaClosure *closure, long n, long npt, double *x,
     const double *xl, const double *xu, double rhobeg, double rhoend,
     long maxfun, double *w);
 

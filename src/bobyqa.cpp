@@ -706,8 +706,9 @@ L210:
     goto L120;
 }
 
+template <class Function>
 static void rescue(
-    const Function function,
+    const Function &function,
     const long n,
     const long npt,
     const double *xl,
@@ -1320,8 +1321,9 @@ L350:
     ;
 }
 
+template <class Function>
 static void prelim(
-    const Function function,
+    const Function &function,
     const long n,
     const long npt,
     double *x,
@@ -2007,8 +2009,9 @@ L200:
     ;
 }
 
+template <class Function>
 static double bobyqb(
-    const Function function,
+    const Function &function,
     const long n,
     const long npt,
     double *x,
@@ -3094,7 +3097,8 @@ L720:
     return f;
 }
 
-double bobyqa(const Function function, long n, long npt, double *x,
+template <class Function>
+static double bobyqa_impl(const Function &function, long n, long npt, double *x,
         const double *xl, const double *xu, double rhobeg, double rhoend,
         long maxfun, double *w) {
     /* System generated locals */
@@ -3231,4 +3235,20 @@ double bobyqa(const Function function, long n, long npt, double *x,
             id_], &w[ivl], &w[iw]);
     //L40:
     ;
+}
+
+double bobyqa(BobyqaFunction function, long n, long npt, double *x,
+        const double *xl, const double *xu, double rhobeg, double rhoend,
+        long maxfun, double *w) {
+    return bobyqa_impl([=] (long n, const double *x) -> double {
+        return function(n, x);
+    }, n, npt, x, xl, xu, rhobeg, rhoend, maxfun, w);
+}
+
+double bobyqa_closure(BobyqaClosure *closure, long n, long npt, double *x,
+        const double *xl, const double *xu, double rhobeg, double rhoend,
+        long maxfun, double *w) {
+    return bobyqa_impl([=] (long n, const double *x) -> double {
+        return closure->function(closure->data, n, x);
+    }, n, npt, x, xl, xu, rhobeg, rhoend, maxfun, w);
 }
