@@ -1,14 +1,16 @@
 #include <algorithm>
 #include <cmath>
-#include <stdexcept>
+#include <cstdio>
 
 #include <bobyqa.h>
 
-namespace {
+#ifdef DEBUG
+#define DEBUG_LOG(what) fprintf(stderr, what)
+#else
+#define DEBUG_LOG(what)
+#endif
 
-struct BobyqaError : std::runtime_error {
-    BobyqaError(const std::string& message) : std::runtime_error(message) {}
-};
+namespace {
 
 void update(
     const long n,
@@ -2166,8 +2168,9 @@ double bobyqb(
     }
     fsave = fval[1];
     if (nf < npt) {
-        throw BobyqaError("Return from BOBYQA because the objective function has been called max_f_evals times.");
-        //goto L720;
+        DEBUG_LOG("Return from BOBYQA because the objective function has been called "
+                  "max_f_evals times.\n");
+        goto L720;
     }
     kbase = 1;
 
@@ -2432,8 +2435,9 @@ L190:
     }
     if (nf < 0) {
         nf = maxfun;
-        throw BobyqaError("Return from BOBYQA because the objective function has been called max_f_evals times.");
-        //goto L720;
+        DEBUG_LOG("Return from BOBYQA because the objective function has been called "
+                  "max_f_evals times.\n");
+        goto L720;
     }
     nresc = nf;
     if (nfsav < nf) {
@@ -2556,8 +2560,8 @@ L230:
             if (nf > nresc) {
                 goto L190;
             }
-            throw BobyqaError("Return from BOBYQA because of much cancellation in a denominator.");
-            //goto L720;
+            DEBUG_LOG("Return from BOBYQA because of much cancellation in a denominator.\n");
+            goto L720;
         }
 
         /*     Alternatively, if NTRITS is positive, then set KNEW to the index of */
@@ -2617,8 +2621,8 @@ L350:
             if (nf > nresc) {
                 goto L190;
             }
-            throw BobyqaError("Return from BOBYQA because of much cancellation in a denominator.");
-            //goto L720;
+            DEBUG_LOG("Return from BOBYQA because of much cancellation in a denominator.\n");
+            goto L720;
         }
     }
 
@@ -2646,8 +2650,9 @@ L360:
         /* L380: */
     }
     if (nf >= maxfun) {
-        throw BobyqaError("Return from BOBYQA because the objective function has been called max_f_evals times.");
-        //goto L720;
+        DEBUG_LOG("Return from BOBYQA because the objective function has been called "
+                  "max_f_evals times.\n");
+        goto L720;
     }
     ++nf;
     f = function(n, &x[1]);
@@ -2695,8 +2700,8 @@ L360:
 
     if (ntrits > 0) {
         if (vquad >= zero) {
-            throw BobyqaError("Return from BOBYQA because a trust region step has failed to reduce Q.");
-            //goto L720;
+            DEBUG_LOG("Return from BOBYQA because a trust region step has failed to reduce Q.\n");
+            goto L720;
         }
         ratio = (f - fopt) / vquad;
         if (ratio <= tenth) {
@@ -3154,8 +3159,8 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
 
     /*     Return if the value of NPT is unacceptable. */
     if (npt < n + 2 || npt > (n + 2) * np / 2) {
-        throw BobyqaError("Return from BOBYQA because NPT is not in the required interval");
-        //goto L40;
+        DEBUG_LOG("Return from BOBYQA because NPT is not in the required interval.\n");
+        goto L40;
     }
 
     /*     Partition the working space array, so that different parts of it can */
@@ -3193,9 +3198,9 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
     for (j = 1; j <= i__1; ++j) {
         temp = xu[j] - xl[j];
         if (temp < rhobeg + rhobeg) {
-            throw BobyqaError("Return from BOBYQA because one of the differences "
-                              "in x_lower and x_upper is less than 2*rho_begin");
-            //goto L40;
+            DEBUG_LOG("Return from BOBYQA because one of the differences in x_lower and x_upper "
+                      "is less than 2*rho_begin.\n");
+            goto L40;
         }
         jsl = isl + j - 1;
         jsu = jsl + n;
@@ -3235,8 +3240,8 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
             ixb], &w[ixp], &w[ifv], &w[ixo], &w[igo], &w[ihq], &w[ipq], &w[
             ibmat], &w[izmat], ndim, &w[isl], &w[isu], &w[ixn], &w[ixa], &w[
             id_], &w[ivl], &w[iw]);
-    //L40:
-    ;
+    L40:
+    return 0.0;
 }
 
 } // namespace
