@@ -27,7 +27,7 @@ BobyqaClosure make_closure(F &function) {
 
 } // namespace
 
-int main(int argc, char **argv) {
+int main() {
     const int variables_count = 2;
 //    const int number_of_interpolation_conditions = variables_count + 2;
     const int number_of_interpolation_conditions = (variables_count + 1)*(variables_count + 2)/2;
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     auto function = [&] (long n, const double *x) {
         assert(n == 2);
         std::cout << "function: ";
-        print_array(2, x);
+        print_array(n, x);
         std::cout << std::endl;
         ++function_calls_count;
         return -4*x[0]*x[1] + 5*x[0]*x[0] + 8*x[1]*x[1] + 16*sqrt(5.0)*x[0] + 8*sqrt(5.0)*x[1] - 44.0;
