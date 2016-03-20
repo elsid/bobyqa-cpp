@@ -14,6 +14,11 @@ namespace {
 
 const double sqrt_2 = std::sqrt(2.0);
 const double sqrt_0_5 = std::sqrt(0.5);
+const double one_plus_sqrt_2 = 1.0 + sqrt_2;
+
+inline constexpr double square(const double x) {
+    return x * x;
+}
 
 void update(
     const long n,
@@ -28,17 +33,6 @@ void update(
     double *w
 )
 {
-    /* System generated locals */
-    long bmat_dim1, bmat_offset, zmat_dim1, zmat_offset, i__1, i__2;
-    double d__1, d__2, d__3;
-
-    /* Local variables */
-    long jp;
-    double tau, temp;
-    long nptm;
-    double alpha, tempa, tempb, ztest;
-
-
     /*     The arrays BMAT and ZMAT are updated, as required by the new position */
     /*     of the interpolation point that has the index KNEW. The vector VLAG has */
     /*     N+NPT components, set on entry to the first NPT and last N components */
@@ -51,46 +45,38 @@ void update(
     /*     Set some constants. */
 
     /* Parameter adjustments */
-    zmat_dim1 = npt;
-    zmat_offset = 1 + zmat_dim1;
+    const long zmat_dim1 = npt;
+    const long zmat_offset = 1 + zmat_dim1;
     zmat -= zmat_offset;
-    bmat_dim1 = ndim;
-    bmat_offset = 1 + bmat_dim1;
+    const long bmat_dim1 = ndim;
+    const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
     --vlag;
     --w;
 
     /* Function Body */
-    nptm = npt - n - 1;
-    ztest = 0.0;
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
-        i__2 = nptm;
-        for (long j = 1; j <= i__2; ++j) {
+    const long nptm = npt - n - 1;
+    double ztest = 0.0;
+    for (long k = 1; k <= npt; ++k) {
+        for (long j = 1; j <= nptm; ++j) {
             /* L10: */
             /* Computing MAX */
-            d__2 = ztest, d__3 = (d__1 = zmat[k + j * zmat_dim1], std::abs(d__1));
-            ztest = std::max(d__2,d__3);
+            ztest = std::max(ztest, std::abs(zmat[k + j * zmat_dim1]));
         }
     }
     ztest *= 1e-20;
 
     /*     Apply the rotations that put zeros in the KNEW-th row of ZMAT. */
 
-    i__2 = nptm;
-    for (long j = 2; j <= i__2; ++j) {
-        if ((d__1 = zmat[knew + j * zmat_dim1], std::abs(d__1)) > ztest) {
+    for (long j = 2; j <= nptm; ++j) {
+        if (std::abs(zmat[knew + j * zmat_dim1]) > ztest) {
             /* Computing 2nd power */
-            d__1 = zmat[knew + zmat_dim1];
             /* Computing 2nd power */
-            d__2 = zmat[knew + j * zmat_dim1];
-            temp = std::sqrt(d__1 * d__1 + d__2 * d__2);
-            tempa = zmat[knew + zmat_dim1] / temp;
-            tempb = zmat[knew + j * zmat_dim1] / temp;
-            i__1 = npt;
-            for (long i__ = 1; i__ <= i__1; ++i__) {
-                temp = tempa * zmat[i__ + zmat_dim1] + tempb * zmat[i__ + j *
-                    zmat_dim1];
+            const double temp = std::hypot(zmat[knew + zmat_dim1], zmat[knew + j * zmat_dim1]);
+            const double tempa = zmat[knew + zmat_dim1] / temp;
+            const double tempb = zmat[knew + j * zmat_dim1] / temp;
+            for (long i__ = 1; i__ <= npt; ++i__) {
+                const double temp = tempa * zmat[i__ + zmat_dim1] + tempb * zmat[i__ + j * zmat_dim1];
                 zmat[i__ + j * zmat_dim1] = tempa * zmat[i__ + j * zmat_dim1]
                     - tempb * zmat[i__ + zmat_dim1];
                 /* L20: */
@@ -104,22 +90,19 @@ void update(
     /*     Put the first NPT components of the KNEW-th column of HLAG into W, */
     /*     and calculate the parameters of the updating formula. */
 
-    i__2 = npt;
-    for (long i__ = 1; i__ <= i__2; ++i__) {
+    for (long i__ = 1; i__ <= npt; ++i__) {
         w[i__] = zmat[knew + zmat_dim1] * zmat[i__ + zmat_dim1];
         /* L40: */
     }
-    alpha = w[knew];
-    tau = vlag[knew];
+    const double alpha = w[knew];
+    const double tau = vlag[knew];
     vlag[knew] -= 1.0;
 
     /*     Complete the updating of ZMAT. */
-
-    temp = std::sqrt(denom);
-    tempb = zmat[knew + zmat_dim1] / temp;
-    tempa = tau / temp;
-    i__2 = npt;
-    for (long i__ = 1; i__ <= i__2; ++i__) {
+    const double temp = std::sqrt(denom);
+    const double tempb = zmat[knew + zmat_dim1] / temp;
+    const double tempa = tau / temp;
+    for (long i__ = 1; i__ <= npt; ++i__) {
         /* L50: */
         zmat[i__ + zmat_dim1] = tempa * zmat[i__ + zmat_dim1] - tempb * vlag[
             i__];
@@ -127,14 +110,12 @@ void update(
 
     /*     Finally, update the matrix BMAT. */
 
-    i__2 = n;
-    for (long j = 1; j <= i__2; ++j) {
-        jp = npt + j;
+    for (long j = 1; j <= n; ++j) {
+        const long jp = npt + j;
         w[jp] = bmat[knew + j * bmat_dim1];
-        tempa = (alpha * vlag[jp] - tau * w[jp]) / denom;
-        tempb = (-(beta) * w[jp] - tau * vlag[jp]) / denom;
-        i__1 = jp;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        const double tempa = (alpha * vlag[jp] - tau * w[jp]) / denom;
+        const double tempb = (-(beta) * w[jp] - tau * vlag[jp]) / denom;
+        for (long i__ = 1; i__ <= jp; ++i__) {
             bmat[i__ + j * bmat_dim1] = bmat[i__ + j * bmat_dim1] + tempa *
                 vlag[i__] + tempb * w[i__];
             if (i__ > npt) {
@@ -168,12 +149,7 @@ void trsbox(
     double *crvmin
 )
 {
-    /* System generated locals */
-    long xpt_dim1, xpt_offset, i__1, i__2;
-    double d__1, d__2, d__3, d__4;
-
     /* Local variables */
-    long ih;
     double ds;
     long iu;
     double dhd, dhs, cth, shs, sth, ssq, beta, sdec, blen;
@@ -230,8 +206,8 @@ void trsbox(
     /*     Set some constants. */
 
     /* Parameter adjustments */
-    xpt_dim1 = npt;
-    xpt_offset = 1 + xpt_dim1;
+    const long xpt_dim1 = npt;
+    const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
     --xopt;
     --gopt;
@@ -258,8 +234,7 @@ void trsbox(
 
     iterc = 0;
     nact = 0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         xbdi[i__] = 0.0;
         if (xopt[i__] <= sl[i__]) {
             if (gopt[i__] >= 0.0) {
@@ -291,8 +266,7 @@ L20:
     beta = 0.0;
 L30:
     stepsq = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         if (xbdi[i__] != 0.0) {
             s[i__] = 0.0;
         } else if (beta == 0.0) {
@@ -302,8 +276,7 @@ L30:
         }
         /* L40: */
         /* Computing 2nd power */
-        d__1 = s[i__];
-        stepsq += d__1 * d__1;
+        stepsq += square(s[i__]);
     }
     if (stepsq == 0.0) {
         goto L190;
@@ -326,12 +299,10 @@ L50:
     resid = delsq;
     ds = 0.0;
     shs = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         if (xbdi[i__] == 0.0) {
             /* Computing 2nd power */
-            d__1 = d__[i__];
-            resid -= d__1 * d__1;
+            resid -= square(d__[i__]);
             ds += s[i__] * d__[i__];
             shs += s[i__] * hs[i__];
         }
@@ -349,16 +320,14 @@ L50:
     stplen = blen;
     if (shs > 0.0) {
         /* Computing MIN */
-        d__1 = blen, d__2 = gredsq / shs;
-        stplen = std::min(d__1,d__2);
+        stplen = std::min(blen, gredsq / shs);
     }
 
     /*     Reduce STPLEN if necessary in order to preserve the simple bounds, */
     /*     letting IACT be the index of the new constrained variable. */
 
     iact = 0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         if (s[i__] != 0.0) {
             xsum = xopt[i__] + d__[i__];
             if (s[i__] > 0.0) {
@@ -388,20 +357,17 @@ L50:
         }
         ggsav = gredsq;
         gredsq = 0.0;
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             gnew[i__] += stplen * hs[i__];
             if (xbdi[i__] == 0.0) {
                 /* Computing 2nd power */
-                d__1 = gnew[i__];
-                gredsq += d__1 * d__1;
+                gredsq += square(gnew[i__]);
             }
             /* L80: */
             d__[i__] += stplen * s[i__];
         }
         /* Computing MAX */
-        d__1 = stplen * (ggsav - 0.5 * stplen * shs);
-        sdec = std::max(d__1,0.0);
+        sdec = std::max(stplen * (ggsav - 0.5 * stplen * shs), 0.0);
         qred += sdec;
     }
 
@@ -414,8 +380,7 @@ L50:
             xbdi[iact] = -1.0;
         }
         /* Computing 2nd power */
-        d__1 = d__[iact];
-        delsq -= d__1 * d__1;
+        delsq -= square(d__[iact]);
         if (delsq <= 0.0) {
             goto L90;
         }
@@ -449,16 +414,13 @@ L100:
     dredsq = 0.0;
     dredg = 0.0;
     gredsq = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         if (xbdi[i__] == 0.0) {
             /* Computing 2nd power */
-            d__1 = d__[i__];
-            dredsq += d__1 * d__1;
+            dredsq += square(d__[i__]);
             dredg += d__[i__] * gnew[i__];
             /* Computing 2nd power */
-            d__1 = gnew[i__];
-            gredsq += d__1 * d__1;
+            gredsq += square(gnew[i__]);
             s[i__] = d__[i__];
         } else {
             s[i__] = 0.0;
@@ -478,8 +440,7 @@ L120:
         goto L190;
     }
     temp = std::sqrt(temp);
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         if (xbdi[i__] == 0.0) {
             s[i__] = (dredg * d__[i__] - dredsq * gnew[i__]) / temp;
         } else {
@@ -496,8 +457,7 @@ L120:
 
     angbd = 1.0;
     iact = 0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         if (xbdi[i__] == 0.0) {
             tempa = xopt[i__] + d__[i__] - sl[i__];
             tempb = su[i__] - xopt[i__] - d__[i__];
@@ -511,13 +471,10 @@ L120:
                 goto L100;
             }
             /* Computing 2nd power */
-            d__1 = d__[i__];
             /* Computing 2nd power */
-            d__2 = s[i__];
-            ssq = d__1 * d__1 + d__2 * d__2;
+            ssq = square(d__[i__]) + square(s[i__]);
             /* Computing 2nd power */
-            d__1 = xopt[i__] - sl[i__];
-            temp = ssq - d__1 * d__1;
+            temp = ssq - square(xopt[i__] - sl[i__]);
             if (temp > 0.0) {
                 temp = std::sqrt(temp) - s[i__];
                 if (angbd * temp > tempa) {
@@ -527,8 +484,7 @@ L120:
                 }
             }
             /* Computing 2nd power */
-            d__1 = su[i__] - xopt[i__];
-            temp = ssq - d__1 * d__1;
+            temp = ssq - square(su[i__] - xopt[i__]);
             if (temp > 0.0) {
                 temp = std::sqrt(temp) + s[i__];
                 if (angbd * temp > tempb) {
@@ -548,8 +504,7 @@ L150:
     shs = 0.0;
     dhs = 0.0;
     dhd = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         if (xbdi[i__] == 0.0) {
             shs += s[i__] * hs[i__];
             dhs += d__[i__] * hs[i__];
@@ -566,8 +521,7 @@ L150:
     isav = 0;
     redsav = 0.0;
     iu = (long) (angbd * 17. + 3.1);
-    i__1 = iu;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= iu; ++i__) {
         angt = angbd * (double) i__ / (double) iu;
         sth = (angt + angt) / (1.0 + angt * angt);
         temp = shs + angt * (angt * dhd - dhs - dhs);
@@ -607,15 +561,13 @@ L150:
 
     dredg = 0.0;
     gredsq = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         gnew[i__] = gnew[i__] + (cth - 1.0) * hred[i__] + sth * hs[i__];
         if (xbdi[i__] == 0.0) {
             d__[i__] = cth * d__[i__] + sth * s[i__];
             dredg += d__[i__] * gnew[i__];
             /* Computing 2nd power */
-            d__1 = gnew[i__];
-            gredsq += d__1 * d__1;
+            gredsq += square(gnew[i__]);
         }
         /* L180: */
         hred[i__] = cth * hred[i__] + sth * hs[i__];
@@ -635,13 +587,10 @@ L150:
     }
 L190:
     *dsq = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         /* Computing MAX */
         /* Computing MIN */
-        d__3 = xopt[i__] + d__[i__], d__4 = su[i__];
-        d__1 = std::min(d__3,d__4), d__2 = sl[i__];
-        xnew[i__] = std::max(d__1,d__2);
+        xnew[i__] = std::max(std::min(xopt[i__] + d__[i__], su[i__]), sl[i__]);
         if (xbdi[i__] == -1.0) {
             xnew[i__] = sl[i__];
         }
@@ -651,8 +600,7 @@ L190:
         d__[i__] = xnew[i__] - xopt[i__];
         /* L200: */
         /* Computing 2nd power */
-        d__1 = d__[i__];
-        *dsq += d__1 * d__1;
+        *dsq += square(d__[i__]);
     }
     return;
     /*     The following instructions multiply the current S-vector by the second */
@@ -661,12 +609,10 @@ L190:
     /*     they can be regarded as an external subroutine. */
 
 L210:
-    ih = 0;
-    i__1 = n;
-    for (long j = 1; j <= i__1; ++j) {
+    long ih = 0;
+    for (long j = 1; j <= n; ++j) {
         hs[j] = 0.0;
-        i__2 = j;
-        for (long i__ = 1; i__ <= i__2; ++i__) {
+        for (long i__ = 1; i__ <= j; ++i__) {
             ++ih;
             if (i__ < j) {
                 hs[j] += hq[ih] * s[i__];
@@ -675,18 +621,15 @@ L210:
             hs[i__] += hq[ih] * s[j];
         }
     }
-    i__2 = npt;
-    for (long k = 1; k <= i__2; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         if (pq[k] != 0.0) {
             temp = 0.0;
-            i__1 = n;
-            for (long j = 1; j <= i__1; ++j) {
+            for (long j = 1; j <= n; ++j) {
                 /* L230: */
                 temp += xpt[k + j * xpt_dim1] * s[j];
             }
             temp *= pq[k];
-            i__1 = n;
-            for (long i__ = 1; i__ <= i__1; ++i__) {
+            for (long i__ = 1; i__ <= n; ++i__) {
                 /* L240: */
                 hs[i__] += temp * xpt[k + i__ * xpt_dim1];
             }
@@ -699,8 +642,7 @@ L210:
     if (iterc > itcsav) {
         goto L150;
     }
-    i__2 = n;
-    for (long i__ = 1; i__ <= i__2; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         /* L260: */
         hred[i__] = hs[i__];
     }
@@ -736,15 +678,8 @@ void rescue(
     double *w
 )
 {
-    /* System generated locals */
-    long xpt_dim1, xpt_offset, bmat_dim1, bmat_offset, zmat_dim1,
-    zmat_offset, i__1, i__2, i__3;
-    double d__1, d__2, d__3, d__4;
-
-
     /* Local variables */
-    double f;
-    long ih, jp, iq, np, iw;
+    long ih, jp, iq, iw;
     double xp = 0, xq = 0, den = 0;
     long ihp = 0;
     long ihq, jpn;
@@ -753,8 +688,7 @@ void rescue(
     double winc;
     long nrem, knew;
     double temp, bsum;
-    long nptm;
-    double hdiag = 0, fbase = 0, sfrac = 0, denom = 0, vquad = 0, sumpq = 0;
+    double hdiag = 0, fbase = 0, denom = 0, vquad = 0, sumpq = 0;
     double dsqmin, distsq, vlmxsq;
 
 
@@ -797,11 +731,11 @@ void rescue(
     /*     Set some constants. */
 
     /* Parameter adjustments */
-    zmat_dim1 = npt;
-    zmat_offset = 1 + zmat_dim1;
+    const long zmat_dim1 = npt;
+    const long zmat_offset = 1 + zmat_dim1;
     zmat -= zmat_offset;
-    xpt_dim1 = npt;
-    xpt_offset = 1 + xpt_dim1;
+    const long xpt_dim1 = npt;
+    const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
     --xl;
     --xu;
@@ -811,8 +745,8 @@ void rescue(
     --gopt;
     --hq;
     --pq;
-    bmat_dim1 = ndim;
-    bmat_offset = 1 + bmat_dim1;
+    const long bmat_dim1 = ndim;
+    const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
     --sl;
     --su;
@@ -822,9 +756,9 @@ void rescue(
     --w;
 
     /* Function Body */
-    np = n + 1;
-    sfrac = 0.5 / (double) np;
-    nptm = npt - np;
+    const long np = n + 1;
+    const double sfrac = 0.5 / double(np);
+    const long nptm = npt - np;
 
     /*     Shift the interpolation points so that XOPT becomes the origin, and set */
     /*     the elements of ZMAT to zero. The value of SUMPQ is required in the */
@@ -835,22 +769,18 @@ void rescue(
 
     sumpq = 0.0;
     winc = 0.0;
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         distsq = 0.0;
-        i__2 = n;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= n; ++j) {
             xpt[k + j * xpt_dim1] -= xopt[j];
             /* L10: */
             /* Computing 2nd power */
-            d__1 = xpt[k + j * xpt_dim1];
-            distsq += d__1 * d__1;
+            distsq += square(xpt[k + j * xpt_dim1]);
         }
         sumpq += pq[k];
         w[ndim + k] = distsq;
         winc = std::max(winc,distsq);
-        i__2 = nptm;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= nptm; ++j) {
             /* L20: */
             zmat[k + j * zmat_dim1] = 0.0;
         }
@@ -860,16 +790,13 @@ void rescue(
     /*     after XBASE has been shifted to the trust region centre. */
 
     ih = 0;
-    i__2 = n;
-    for (long j = 1; j <= i__2; ++j) {
+    for (long j = 1; j <= n; ++j) {
         w[j] = 0.5 * sumpq * xopt[j];
-        i__1 = npt;
-        for (long k = 1; k <= i__1; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L30: */
             w[j] += pq[k] * xpt[k + j * xpt_dim1];
         }
-        i__1 = j;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= j; ++i__) {
             ++ih;
             /* L40: */
             hq[ih] = hq[ih] + w[i__] * xopt[j] + w[j] * xopt[i__];
@@ -879,29 +806,24 @@ void rescue(
     /*     Shift XBASE, SL, SU and XOPT. Set the elements of BMAT to zero, and */
     /*     also set the elements of PTSAUX. */
 
-    i__1 = n;
-    for (long j = 1; j <= i__1; ++j) {
+    for (long j = 1; j <= n; ++j) {
         xbase[j] += xopt[j];
         sl[j] -= xopt[j];
         su[j] -= xopt[j];
         xopt[j] = 0.0;
         /* Computing MIN */
-        d__1 = delta, d__2 = su[j];
-        ptsaux[(j << 1) + 1] = std::min(d__1,d__2);
+        ptsaux[(j << 1) + 1] = std::min(delta, su[j]);
         /* Computing MAX */
-        d__1 = -(delta), d__2 = sl[j];
-        ptsaux[(j << 1) + 2] = std::max(d__1,d__2);
+        ptsaux[(j << 1) + 2] = std::max(-delta, sl[j]);
         if (ptsaux[(j << 1) + 1] + ptsaux[(j << 1) + 2] < 0.0) {
             temp = ptsaux[(j << 1) + 1];
             ptsaux[(j << 1) + 1] = ptsaux[(j << 1) + 2];
             ptsaux[(j << 1) + 2] = temp;
         }
-        if ((d__2 = ptsaux[(j << 1) + 2], std::abs(d__2)) < 0.5 * (d__1 = ptsaux[(
-                    j << 1) + 1], std::abs(d__1))) {
+        if (std::abs(ptsaux[(j << 1) + 2]) < 0.5 * std::abs(ptsaux[(j << 1) + 1])) {
             ptsaux[(j << 1) + 2] = 0.5 * ptsaux[(j << 1) + 1];
         }
-        i__2 = ndim;
-        for (long i__ = 1; i__ <= i__2; ++i__) {
+        for (long i__ = 1; i__ <= ndim; ++i__) {
             /* L50: */
             bmat[i__ + j * bmat_dim1] = 0.0;
         }
@@ -913,8 +835,7 @@ void rescue(
     /*     nonzero elements of BMAT and ZMAT. */
 
     ptsid[1] = sfrac;
-    i__2 = n;
-    for (long j = 1; j <= i__2; ++j) {
+    for (long j = 1; j <= n; ++j) {
         jp = j + 1;
         jpn = jp + n;
         ptsid[jp] = (double) j + sfrac;
@@ -925,18 +846,14 @@ void rescue(
             bmat[jpn + j * bmat_dim1] = temp + 1.0 / ptsaux[(j << 1) + 2];
             bmat[j * bmat_dim1 + 1] = -bmat[jp + j * bmat_dim1] - bmat[jpn +
                 j * bmat_dim1];
-            zmat[j * zmat_dim1 + 1] = sqrt_2 / (d__1 = ptsaux[(j << 1) + 1]
-                                                  * ptsaux[(j << 1) + 2], std::abs(d__1));
-            zmat[jp + j * zmat_dim1] = zmat[j * zmat_dim1 + 1] * ptsaux[(j <<
-                                                                         1) + 2] * temp;
-            zmat[jpn + j * zmat_dim1] = -zmat[j * zmat_dim1 + 1] * ptsaux[(j
-                                                                           << 1) + 1] * temp;
+            zmat[j * zmat_dim1 + 1] = sqrt_2 / std::abs(ptsaux[(j << 1) + 1] * ptsaux[(j << 1) + 2]);
+            zmat[jp + j * zmat_dim1] = zmat[j * zmat_dim1 + 1] * ptsaux[(j << 1) + 2] * temp;
+            zmat[jpn + j * zmat_dim1] = -zmat[j * zmat_dim1 + 1] * ptsaux[(j << 1) + 1] * temp;
         } else {
             bmat[j * bmat_dim1 + 1] = -1.0 / ptsaux[(j << 1) + 1];
             bmat[jp + j * bmat_dim1] = 1.0 / ptsaux[(j << 1) + 1];
             /* Computing 2nd power */
-            d__1 = ptsaux[(j << 1) + 1];
-            bmat[j + npt + j * bmat_dim1] = -0.5 * (d__1 * d__1);
+            bmat[j + npt + j * bmat_dim1] = -0.5 * square(ptsaux[(j << 1) + 1]);
         }
         /* L60: */
     }
@@ -944,8 +861,7 @@ void rescue(
     /*     Set any remaining identifiers with their nonzero elements of ZMAT. */
 
     if (npt >= n + np) {
-        i__2 = npt;
-        for (long k = np << 1; k <= i__2; ++k) {
+        for (long k = np << 1; k <= npt; ++k) {
             iw = (long) (((double) (k - np) - 0.5) / (double) (n)
             );
             const long ip = k - np - iw * n;
@@ -971,15 +887,13 @@ void rescue(
     /*     with PTSID(KNEW). */
 
 L80:
-    i__2 = n;
-    for (long j = 1; j <= i__2; ++j) {
+    for (long j = 1; j <= n; ++j) {
         temp = bmat[kold + j * bmat_dim1];
         bmat[kold + j * bmat_dim1] = bmat[knew + j * bmat_dim1];
         /* L90: */
         bmat[knew + j * bmat_dim1] = temp;
     }
-    i__2 = nptm;
-    for (long j = 1; j <= i__2; ++j) {
+    for (long j = 1; j <= nptm; ++j) {
         temp = zmat[kold + j * zmat_dim1];
         zmat[kold + j * zmat_dim1] = zmat[knew + j * zmat_dim1];
         /* L100: */
@@ -1004,10 +918,9 @@ L80:
         if (nrem == 0) {
             goto L350;
         }
-        i__2 = npt;
-        for (long k = 1; k <= i__2; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L110: */
-            w[ndim + k] = (d__1 = w[ndim + k], std::abs(d__1));
+            w[ndim + k] = std::abs(w[ndim + k]);
         }
     }
 
@@ -1017,8 +930,7 @@ L80:
 
 L120:
     dsqmin = 0.0;
-    i__2 = npt;
-    for (long k = 1; k <= i__2; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         if (w[ndim + k] > 0.0) {
             if (dsqmin == 0.0 || w[ndim + k] < dsqmin) {
                 knew = k;
@@ -1033,18 +945,15 @@ L120:
 
     /*     Form the W-vector of the chosen original interpolation point. */
 
-    i__2 = n;
-    for (long j = 1; j <= i__2; ++j) {
+    for (long j = 1; j <= n; ++j) {
         /* L140: */
         w[npt + j] = xpt[knew + j * xpt_dim1];
     }
-    i__2 = npt;
-    for (long k = 1; k <= i__2; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         sum = 0.0;
         if (k == kopt) {
         } else if (ptsid[k] == 0.0) {
-            i__1 = n;
-            for (long j = 1; j <= i__1; ++j) {
+            for (long j = 1; j <= n; ++j) {
                 /* L150: */
                 sum += w[npt + j] * xpt[k + j * xpt_dim1];
             }
@@ -1070,11 +979,9 @@ L120:
     /*     Calculate VLAG and BETA for the required updating of the H matrix if */
     /*     XPT(KNEW,.) is reinstated in the set of interpolation points. */
 
-    i__2 = npt;
-    for (long k = 1; k <= i__2; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         sum = 0.0;
-        i__1 = n;
-        for (long j = 1; j <= i__1; ++j) {
+        for (long j = 1; j <= n; ++j) {
             /* L170: */
             sum += bmat[k + j * bmat_dim1] * w[npt + j];
         }
@@ -1082,35 +989,29 @@ L120:
         vlag[k] = sum;
     }
     beta = 0.0;
-    i__2 = nptm;
-    for (long j = 1; j <= i__2; ++j) {
+    for (long j = 1; j <= nptm; ++j) {
         sum = 0.0;
-        i__1 = npt;
-        for (long k = 1; k <= i__1; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L190: */
             sum += zmat[k + j * zmat_dim1] * w[k];
         }
         beta -= sum * sum;
-        i__1 = npt;
-        for (long k = 1; k <= i__1; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L200: */
             vlag[k] += sum * zmat[k + j * zmat_dim1];
         }
     }
     bsum = 0.0;
     distsq = 0.0;
-    i__1 = n;
-    for (long j = 1; j <= i__1; ++j) {
+    for (long j = 1; j <= n; ++j) {
         sum = 0.0;
-        i__2 = npt;
-        for (long k = 1; k <= i__2; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L210: */
             sum += bmat[k + j * bmat_dim1] * w[k];
         }
         jp = j + npt;
         bsum += sum * w[jp];
-        i__2 = ndim;
-        for (long ip = npt + 1; ip <= i__2; ++ip) {
+        for (long ip = npt + 1; ip <= ndim; ++ip) {
             /* L220: */
             sum += bmat[ip + j * bmat_dim1] * w[ip];
         }
@@ -1118,8 +1019,7 @@ L120:
         vlag[jp] = sum;
         /* L230: */
         /* Computing 2nd power */
-        d__1 = xpt[knew + j * xpt_dim1];
-        distsq += d__1 * d__1;
+        distsq += square(xpt[knew + j * xpt_dim1]);
     }
     beta = 0.5 * distsq * distsq + beta - bsum;
     vlag[kopt] += 1.0;
@@ -1131,20 +1031,16 @@ L120:
 
     denom = 0.0;
     vlmxsq = 0.0;
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         if (ptsid[k] != 0.0) {
             hdiag = 0.0;
-            i__2 = nptm;
-            for (long j = 1; j <= i__2; ++j) {
+            for (long j = 1; j <= nptm; ++j) {
                 /* L240: */
                 /* Computing 2nd power */
-                d__1 = zmat[k + j * zmat_dim1];
-                hdiag += d__1 * d__1;
+                hdiag += square(zmat[k + j * zmat_dim1]);
             }
             /* Computing 2nd power */
-            d__1 = vlag[k];
-            den = beta * hdiag + d__1 * d__1;
+            den = beta * hdiag + square(vlag[k]);
             if (den > denom) {
                 kold = k;
                 denom = den;
@@ -1153,9 +1049,7 @@ L120:
         /* L250: */
         /* Computing MAX */
         /* Computing 2nd power */
-        d__3 = vlag[k];
-        d__1 = vlmxsq, d__2 = d__3 * d__3;
-        vlmxsq = std::max(d__1,d__2);
+        vlmxsq = std::max(vlmxsq, square(vlag[k]));
     }
     if (denom <= vlmxsq * .01) {
         w[ndim + knew] = -w[ndim + knew] - winc;
@@ -1172,8 +1066,7 @@ L120:
     /*     except that a RETURN occurs if MAXFUN prohibits another value of F. */
 
 L260:
-    i__1 = npt;
-    for (long kpt = 1; kpt <= i__1; ++kpt) {
+    for (long kpt = 1; kpt <= npt; ++kpt) {
         if (ptsid[kpt] == 0.0) {
             goto L340;
         }
@@ -1182,13 +1075,11 @@ L260:
             goto L350;
         }
         ih = 0;
-        i__2 = n;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= n; ++j) {
             w[j] = xpt[kpt + j * xpt_dim1];
             xpt[kpt + j * xpt_dim1] = 0.0;
             temp = pq[kpt] * w[j];
-            i__3 = j;
-            for (long i__ = 1; i__ <= i__3; ++i__) {
+            for (long i__ = 1; i__ <= j; ++i__) {
                 ++ih;
                 /* L270: */
                 hq[ih] += temp * w[i__];
@@ -1224,12 +1115,11 @@ L260:
             ihq = (iq + iq * iq) / 2;
             vquad += xq * (gopt[iq] + 0.5 * xq * hq[ihq]);
             if (ip > 0) {
-                iw = std::max(ihp,ihq) - (i__3 = ip - iq, std::abs(i__3));
+                iw = std::max(ihp, ihq) - std::abs(ip - iq);
                 vquad += xp * xq * hq[iw];
             }
         }
-        i__3 = npt;
-        for (long k = 1; k <= i__3; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             temp = 0.0;
             if (ip > 0) {
                 temp += xp * xpt[k + ip * xpt_dim1];
@@ -1247,13 +1137,10 @@ L260:
         /*     that is going to multiply the KPT-th Lagrange function when the model */
         /*     is updated to provide interpolation to the new function value. */
 
-        i__3 = n;
-        for (long i__ = 1; i__ <= i__3; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             /* Computing MIN */
             /* Computing MAX */
-            d__3 = xl[i__], d__4 = xbase[i__] + xpt[kpt + i__ * xpt_dim1];
-            d__1 = std::max(d__3,d__4), d__2 = xu[i__];
-            w[i__] = std::min(d__1,d__2);
+            w[i__] = std::min(std::max(xl[i__], xbase[i__] + xpt[kpt + i__ * xpt_dim1]), xu[i__]);
             if (xpt[kpt + i__ * xpt_dim1] == sl[i__]) {
                 w[i__] = xl[i__];
             }
@@ -1263,26 +1150,25 @@ L260:
             /* L290: */
         }
         ++(nf);
-        f = function(n, &w[1]);
-        fval[kpt] = f;
-        if (f < fval[kopt]) {
-            kopt = kpt;
+        {
+            const double f = function(n, &w[1]);
+            fval[kpt] = f;
+            if (f < fval[kopt]) {
+                kopt = kpt;
+            }
+            diff = f - vquad;
         }
-        diff = f - vquad;
 
         /*     Update the quadratic model. The RETURN from the subroutine occurs when */
         /*     all the new interpolation points are included in the model. */
 
-        i__3 = n;
-        for (long i__ = 1; i__ <= i__3; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             /* L310: */
             gopt[i__] += diff * bmat[kpt + i__ * bmat_dim1];
         }
-        i__3 = npt;
-        for (long k = 1; k <= i__3; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             sum = 0.0;
-            i__2 = nptm;
-            for (long j = 1; j <= i__2; ++j) {
+            for (long j = 1; j <= nptm; ++j) {
                 /* L320: */
                 sum += zmat[k + j * zmat_dim1] * zmat[kpt + j * zmat_dim1];
             }
@@ -1296,20 +1182,16 @@ L260:
                 ihq = (iq * iq + iq) / 2;
                 if (ip == 0) {
                     /* Computing 2nd power */
-                    d__1 = ptsaux[(iq << 1) + 2];
-                    hq[ihq] += temp * (d__1 * d__1);
+                    hq[ihq] += temp * square(ptsaux[(iq << 1) + 2]);
                 } else {
                     ihp = (ip * ip + ip) / 2;
                     /* Computing 2nd power */
-                    d__1 = ptsaux[(ip << 1) + 1];
-                    hq[ihp] += temp * (d__1 * d__1);
+                    hq[ihp] += temp * square(ptsaux[(ip << 1) + 1]);
                     if (iq > 0) {
                         /* Computing 2nd power */
-                        d__1 = ptsaux[(iq << 1) + 1];
-                        hq[ihq] += temp * (d__1 * d__1);
-                        iw = std::max(ihp,ihq) - (i__2 = iq - ip, std::abs(i__2));
-                        hq[iw] += temp * ptsaux[(ip << 1) + 1] * ptsaux[(iq <<
-                                                                         1) + 1];
+                        hq[ihq] += temp * square(ptsaux[(iq << 1) + 1]);
+                        iw = std::max(ihp, ihq) - std::abs(iq - ip);
+                        hq[iw] += temp * ptsaux[(ip << 1) + 1] * ptsaux[(iq << 1) + 1];
                     }
                 }
             }
@@ -1348,21 +1230,11 @@ void prelim(
     long& kopt
 )
 {
-    /* System generated locals */
-    long xpt_dim1, xpt_offset, bmat_dim1, bmat_offset, zmat_dim1,
-    zmat_offset, i__1, i__2;
-    double d__1, d__2, d__3, d__4;
-
-
     /* Local variables */
-    double f;
-    long ih, np, nfm;
+    long ih, nfm;
     long nfx = 0, ipt = 0, jpt = 0;
-    double fbeg = 0, diff = 0, temp = 0, recip = 0, stepa = 0, stepb = 0;
+    double fbeg = 0, diff = 0, temp = 0, stepa = 0, stepb = 0;
     long itemp;
-    double rhosq;
-
-
 
     /*     The arguments N, NPT, X, XL, XU, RHOBEG, IPRINT and MAXFUN are the */
     /*       same as the corresponding arguments in SUBROUTINE BOBYQA. */
@@ -1383,11 +1255,11 @@ void prelim(
     /*     Set some constants. */
 
     /* Parameter adjustments */
-    zmat_dim1 = npt;
-    zmat_offset = 1 + zmat_dim1;
+    const long zmat_dim1 = npt;
+    const long zmat_offset = 1 + zmat_dim1;
     zmat -= zmat_offset;
-    xpt_dim1 = npt;
-    xpt_offset = 1 + xpt_dim1;
+    const long xpt_dim1 = npt;
+    const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
     --x;
     --xl;
@@ -1397,43 +1269,39 @@ void prelim(
     --gopt;
     --hq;
     --pq;
-    bmat_dim1 = ndim;
-    bmat_offset = 1 + bmat_dim1;
+    const long bmat_dim1 = ndim;
+    const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
     --sl;
     --su;
 
     /* Function Body */
-    rhosq = rhobeg * rhobeg;
-    recip = 1.0 / rhosq;
-    np = n + 1;
+    const double rhosq = rhobeg * rhobeg;
+    const double recip = 1.0 / rhosq;
+    const long np = n + 1;
 
     /*     Set XBASE to the initial vector of variables, and set the initial */
     /*     elements of XPT, BMAT, HQ, PQ and ZMAT to zero. */
 
-    i__1 = n;
-    for (long j = 1; j <= i__1; ++j) {
+    for (long j = 1; j <= n; ++j) {
         xbase[j] = x[j];
-        i__2 = npt;
-        for (long k = 1; k <= i__2; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L10: */
             xpt[k + j * xpt_dim1] = 0.0;
         }
-        i__2 = ndim;
-        for (long i__ = 1; i__ <= i__2; ++i__) {
+        for (long i__ = 1; i__ <= ndim; ++i__) {
             /* L20: */
             bmat[i__ + j * bmat_dim1] = 0.0;
         }
     }
-    i__2 = n * np / 2;
-    for (long ih = 1; ih <= i__2; ++ih) {
+    const long ih_n = n * np / 2;
+    for (long ih = 1; ih <= ih_n; ++ih) {
         /* L30: */
         hq[ih] = 0.0;
     }
-    i__2 = npt;
-    for (long k = 1; k <= i__2; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         pq[k] = 0.0;
-        i__1 = npt - np;
+        const long i__1 = npt - np;
         for (long j = 1; j <= i__1; ++j) {
             /* L40: */
             zmat[k + j * zmat_dim1] = 0.0;
@@ -1461,13 +1329,11 @@ L50:
             stepb = -(rhobeg);
             if (sl[nfx] == 0.0) {
                 /* Computing MIN */
-                d__1 = 2.0 * rhobeg, d__2 = su[nfx];
-                stepb = std::min(d__1,d__2);
+                stepb = std::min(2.0 * rhobeg, su[nfx]);
             }
             if (su[nfx] == 0.0) {
                 /* Computing MAX */
-                d__1 = -2.0 * rhobeg, d__2 = sl[nfx];
-                stepb = std::max(d__1,d__2);
+                stepb = std::max(-2.0 * rhobeg, sl[nfx]);
             }
             xpt[nf + nfx * xpt_dim1] = stepb;
         }
@@ -1487,13 +1353,10 @@ L50:
     /*     Calculate the next value of F. The least function value so far and */
     /*     its index are required. */
 
-    i__1 = n;
-    for (long j = 1; j <= i__1; ++j) {
+    for (long j = 1; j <= n; ++j) {
         /* Computing MIN */
         /* Computing MAX */
-        d__3 = xl[j], d__4 = xbase[j] + xpt[nf + j * xpt_dim1];
-        d__1 = std::max(d__3,d__4), d__2 = xu[j];
-        x[j] = std::min(d__1,d__2);
+        x[j] = std::min(std::max(xl[j], xbase[j] + xpt[nf + j * xpt_dim1]), xu[j]);
         if (xpt[nf + j * xpt_dim1] == sl[j]) {
             x[j] = xl[j];
         }
@@ -1502,7 +1365,7 @@ L50:
         }
         /* L60: */
     }
-    f = function(n, &x[1]);
+    const double f = function(n, &x[1]);
     fval[nf] = f;
     if (nf == 1) {
         fbeg = f;
@@ -1593,14 +1456,8 @@ void altmov(
     double *w
 )
 {
-    /* System generated locals */
-    long xpt_dim1, xpt_offset, bmat_dim1, bmat_offset, zmat_dim1,
-    zmat_offset, i__1, i__2;
-    double d__1, d__2, d__3, d__4;
-
-
     /* Local variables */
-    double ha, gw, diff;
+    double gw, diff;
     long ilbd, isbd;
     double slbd;
     long iubd;
@@ -1608,11 +1465,9 @@ void altmov(
     long ksav = 0;
     double step = 0, curv = 0;
     long iflag;
-    double scale = 0, csave = 0, tempa = 0, tempb = 0, tempd = 0, const__ = 0, sumin = 0,
-               ggfree = 0;
+    double scale = 0, csave = 0, tempa = 0, tempb = 0, tempd = 0, sumin = 0, ggfree = 0;
     long ibdsav = 0;
     double dderiv = 0, bigstp = 0, predsq = 0, presav = 0, distsq = 0, stpsav = 0, wfixsq = 0, wsqsav = 0;
-
 
     /*     The arguments N, NPT, XPT, XOPT, BMAT, ZMAT, NDIM, SL and SU all have */
     /*       the same meanings as the corresponding arguments of BOBYQB. */
@@ -1645,15 +1500,15 @@ void altmov(
     /*     KNEW-th column of the H matrix. */
 
     /* Parameter adjustments */
-    zmat_dim1 = npt;
-    zmat_offset = 1 + zmat_dim1;
+    const long zmat_dim1 = npt;
+    const long zmat_offset = 1 + zmat_dim1;
     zmat -= zmat_offset;
-    xpt_dim1 = npt;
-    xpt_offset = 1 + xpt_dim1;
+    const long xpt_dim1 = npt;
+    const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
     --xopt;
-    bmat_dim1 = ndim;
-    bmat_offset = 1 + bmat_dim1;
+    const long bmat_dim1 = ndim;
+    const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
     --sl;
     --su;
@@ -1664,42 +1519,35 @@ void altmov(
     --w;
 
     /* Function Body */
-    const__ = 1.0 + std::sqrt(2.);
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         /* L10: */
         hcol[k] = 0.0;
     }
-    i__1 = npt - n - 1;
-    for (long j = 1; j <= i__1; ++j) {
+    const long j_n = npt - n - 1;
+    for (long j = 1; j <= j_n; ++j) {
         temp = zmat[knew + j * zmat_dim1];
-        i__2 = npt;
-        for (long k = 1; k <= i__2; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L20: */
             hcol[k] += temp * zmat[k + j * zmat_dim1];
         }
     }
     alpha = hcol[knew];
-    ha = 0.5 * alpha;
+    const double ha = 0.5 * alpha;
 
     /*     Calculate the gradient of the KNEW-th Lagrange function at XOPT. */
 
-    i__2 = n;
-    for (long i__ = 1; i__ <= i__2; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         /* L30: */
         glag[i__] = bmat[knew + i__ * bmat_dim1];
     }
-    i__2 = npt;
-    for (long k = 1; k <= i__2; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         temp = 0.0;
-        i__1 = n;
-        for (long j = 1; j <= i__1; ++j) {
+        for (long j = 1; j <= n; ++j) {
             /* L40: */
             temp += xpt[k + j * xpt_dim1] * xopt[j];
         }
         temp = hcol[k] * temp;
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             /* L50: */
             glag[i__] += temp * xpt[k + i__ * xpt_dim1];
         }
@@ -1712,15 +1560,13 @@ void altmov(
     /*     will be set to the largest admissible value of PREDSQ that occurs. */
 
     presav = 0.0;
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         if (k == kopt) {
             goto L80;
         }
         dderiv = 0.0;
         distsq = 0.0;
-        i__2 = n;
-        for (long i__ = 1; i__ <= i__2; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             temp = xpt[k + i__ * xpt_dim1] - xopt[i__];
             dderiv += glag[i__] * temp;
             /* L60: */
@@ -1734,8 +1580,7 @@ void altmov(
 
         /*     Revise SLBD and SUBD if necessary because of the bounds in SL and SU. */
 
-        i__2 = n;
-        for (long i__ = 1; i__ <= i__2; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             temp = xpt[k + i__ * xpt_dim1] - xopt[i__];
             if (temp > 0.0) {
                 if (slbd * temp < sl[i__] - xopt[i__]) {
@@ -1744,8 +1589,7 @@ void altmov(
                 }
                 if (subd * temp > su[i__] - xopt[i__]) {
                     /* Computing MAX */
-                    d__1 = sumin, d__2 = (su[i__] - xopt[i__]) / temp;
-                    subd = std::max(d__1,d__2);
+                    subd = std::max(sumin, (su[i__] - xopt[i__]) / temp);
                     iubd = i__;
                 }
             } else if (temp < 0.0) {
@@ -1755,8 +1599,7 @@ void altmov(
                 }
                 if (subd * temp < sl[i__] - xopt[i__]) {
                     /* Computing MAX */
-                    d__1 = sumin, d__2 = (sl[i__] - xopt[i__]) / temp;
-                    subd = std::max(d__1,d__2);
+                    subd = std::max(sumin, (sl[i__] - xopt[i__]) / temp);
                     iubd = -i__;
                 }
             }
@@ -1827,15 +1670,12 @@ L80:
 
     /*     Construct XNEW in a way that satisfies the bound constraints exactly. */
 
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         temp = xopt[i__] + stpsav * (xpt[ksav + i__ * xpt_dim1] - xopt[i__]);
         /* L90: */
         /* Computing MAX */
         /* Computing MIN */
-        d__3 = su[i__];
-        d__1 = sl[i__], d__2 = std::min(d__3,temp);
-        xnew[i__] = std::max(d__1,d__2);
+        xnew[i__] = std::max(sl[i__], std::min(su[i__], temp));
     }
     if (ibdsav < 0) {
         xnew[-ibdsav] = sl[-ibdsav];
@@ -1853,20 +1693,16 @@ L80:
 L100:
     wfixsq = 0.0;
     ggfree = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         w[i__] = 0.0;
         /* Computing MIN */
-        d__1 = xopt[i__] - sl[i__], d__2 = glag[i__];
-        tempa = std::min(d__1,d__2);
+        tempa = std::min(xopt[i__] - sl[i__], glag[i__]);
         /* Computing MAX */
-        d__1 = xopt[i__] - su[i__], d__2 = glag[i__];
-        tempb = std::max(d__1,d__2);
+        tempb = std::max(xopt[i__] - su[i__], glag[i__]);
         if (tempa > 0.0 || tempb < 0.0) {
             w[i__] = bigstp;
             /* Computing 2nd power */
-            d__1 = glag[i__];
-            ggfree += d__1 * d__1;
+            ggfree += square(glag[i__]);
         }
         /* L110: */
     }
@@ -1883,24 +1719,20 @@ L120:
         wsqsav = wfixsq;
         step = std::sqrt(temp / ggfree);
         ggfree = 0.0;
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             if (w[i__] == bigstp) {
                 temp = xopt[i__] - step * glag[i__];
                 if (temp <= sl[i__]) {
                     w[i__] = sl[i__] - xopt[i__];
                     /* Computing 2nd power */
-                    d__1 = w[i__];
-                    wfixsq += d__1 * d__1;
+                    wfixsq += square(w[i__]);
                 } else if (temp >= su[i__]) {
                     w[i__] = su[i__] - xopt[i__];
                     /* Computing 2nd power */
-                    d__1 = w[i__];
-                    wfixsq += d__1 * d__1;
+                    wfixsq += square(w[i__]);
                 } else {
                     /* Computing 2nd power */
-                    d__1 = glag[i__];
-                    ggfree += d__1 * d__1;
+                    ggfree += square(glag[i__]);
                 }
             }
             /* L130: */
@@ -1914,15 +1746,12 @@ L120:
     /*     except that W may be scaled later. */
 
     gw = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         if (w[i__] == bigstp) {
             w[i__] = -step * glag[i__];
             /* Computing MAX */
             /* Computing MIN */
-            d__3 = su[i__], d__4 = xopt[i__] + w[i__];
-            d__1 = sl[i__], d__2 = std::min(d__3,d__4);
-            xalt[i__] = std::max(d__1,d__2);
+            xalt[i__] = std::max(sl[i__], std::min(su[i__], xopt[i__] + w[i__]));
         } else if (w[i__] == 0.0) {
             xalt[i__] = xopt[i__];
         } else if (glag[i__] > 0.0) {
@@ -1940,11 +1769,9 @@ L120:
     /*     the square of this function. */
 
     curv = 0.0;
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         temp = 0.0;
-        i__2 = n;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= n; ++j) {
             /* L150: */
             temp += xpt[k + j * xpt_dim1] * w[j];
         }
@@ -1954,25 +1781,20 @@ L120:
     if (iflag == 1) {
         curv = -curv;
     }
-    if (curv > -gw && curv < -const__ * gw) {
+    if (curv > -gw && curv < -one_plus_sqrt_2 * gw) {
         scale = -gw / curv;
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             temp = xopt[i__] + scale * w[i__];
             /* L170: */
             /* Computing MAX */
             /* Computing MIN */
-            d__3 = su[i__];
-            d__1 = sl[i__], d__2 = std::min(d__3,temp);
-            xalt[i__] = std::max(d__1,d__2);
+            xalt[i__] = std::max(sl[i__], std::min(su[i__], temp));
         }
         /* Computing 2nd power */
-        d__1 = 0.5 * gw * scale;
-        cauchy = d__1 * d__1;
+        cauchy = square(0.5 * gw * scale);
     } else {
         /* Computing 2nd power */
-        d__1 = gw + 0.5 * curv;
-        cauchy = d__1 * d__1;
+        cauchy = square(gw + 0.5 * curv);
     }
 
     /*     If IFLAG is zero, then XALT is calculated as before after reversing */
@@ -1980,8 +1802,7 @@ L120:
     /*     is chosen is the one that gives the larger value of CAUCHY. */
 
     if (iflag == 0) {
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             glag[i__] = -glag[i__];
             /* L180: */
             w[n + i__] = xalt[i__];
@@ -1991,8 +1812,7 @@ L120:
         goto L100;
     }
     if (csave > cauchy) {
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             /* L190: */
             xalt[i__] = w[n + i__];
         }
@@ -2032,20 +1852,14 @@ double bobyqb(
     double *w
 )
 {
-    /* System generated locals */
-    long xpt_dim1, xpt_offset, bmat_dim1, bmat_offset, zmat_dim1,
-    zmat_offset, i__1, i__2, i__3;
-    double d__1, d__2, d__3, d__4;
-
     /* Local variables */
     double f = 0;
-    long ih, nf, nh, jp;
+    long ih, nf, jp;
     double dx;
-    long np;
     double den = 0, dsq = 0, rho = 0, sum = 0, diff = 0, beta = 0, gisq = 0;
     long knew = 0;
     double temp, suma, sumb, bsum, fopt;
-    long kopt = 0, nptm;
+    long kopt = 0;
     double curv;
     long ksav;
     double gqsq = 0, dist = 0, sumw = 0, sumz = 0, diffa = 0, diffb = 0, diffc = 0, hdiag = 0;
@@ -2099,11 +1913,11 @@ double bobyqb(
     /*     Set some constants. */
 
     /* Parameter adjustments */
-    zmat_dim1 = npt;
-    zmat_offset = 1 + zmat_dim1;
+    const long zmat_dim1 = npt;
+    const long zmat_offset = 1 + zmat_dim1;
     zmat -= zmat_offset;
-    xpt_dim1 = npt;
-    xpt_offset = 1 + xpt_dim1;
+    const long xpt_dim1 = npt;
+    const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
     --x;
     --xl;
@@ -2114,8 +1928,8 @@ double bobyqb(
     --gopt;
     --hq;
     --pq;
-    bmat_dim1 = ndim;
-    bmat_offset = 1 + bmat_dim1;
+    const long bmat_dim1 = ndim;
+    const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
     --sl;
     --su;
@@ -2126,9 +1940,9 @@ double bobyqb(
     --w;
 
     /* Function Body */
-    np = n + 1;
-    nptm = npt - np;
-    nh = n * np / 2;
+    const long np = n + 1;
+    const long nptm = npt - np;
+    const long nh = n * np / 2;
 
     /*     The call of PRELIM sets the elements of XBASE, XPT, FVAL, GOPT, HQ, PQ, */
     /*     BMAT and ZMAT for the first iteration, with the corresponding values of */
@@ -2141,13 +1955,11 @@ double bobyqb(
             &xpt[xpt_offset], &fval[1], &gopt[1], &hq[1], &pq[1], &bmat[bmat_offset],
             &zmat[zmat_offset], ndim, &sl[1], &su[1], nf, kopt);
     xoptsq = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         xopt[i__] = xpt[kopt + i__ * xpt_dim1];
         /* L10: */
         /* Computing 2nd power */
-        d__1 = xopt[i__];
-        xoptsq += d__1 * d__1;
+        xoptsq += square(xopt[i__]);
     }
     fsave = fval[1];
     if (nf < npt) {
@@ -2174,10 +1986,8 @@ double bobyqb(
 L20:
     if (kopt != kbase) {
         ih = 0;
-        i__1 = n;
-        for (long j = 1; j <= i__1; ++j) {
-            i__2 = j;
-            for (long i__ = 1; i__ <= i__2; ++i__) {
+        for (long j = 1; j <= n; ++j) {
+            for (long i__ = 1; i__ <= j; ++i__) {
                 ++ih;
                 if (i__ < j) {
                     gopt[j] += hq[ih] * xopt[i__];
@@ -2187,17 +1997,14 @@ L20:
             }
         }
         if (nf > npt) {
-            i__2 = npt;
-            for (long k = 1; k <= i__2; ++k) {
+            for (long k = 1; k <= npt; ++k) {
                 temp = 0.0;
-                i__1 = n;
-                for (long j = 1; j <= i__1; ++j) {
+                for (long j = 1; j <= n; ++j) {
                     /* L40: */
                     temp += xpt[k + j * xpt_dim1] * xopt[j];
                 }
                 temp = pq[k] * temp;
-                i__1 = n;
-                for (long i__ = 1; i__ <= i__1; ++i__) {
+                for (long i__ = 1; i__ <= n; ++i__) {
                     /* L50: */
                     gopt[i__] += temp * xpt[k + i__ * xpt_dim1];
                 }
@@ -2217,13 +2024,11 @@ L60:
             &su[1], delta, &xnew[1], &d__[1], &w[1], &w[np], &w[np + n],
             &w[np + (n << 1)], &w[np + n * 3], &dsq, &crvmin);
     /* Computing MIN */
-    d__1 = delta, d__2 = std::sqrt(dsq);
-    dnorm = std::min(d__1,d__2);
+    dnorm = std::min(delta, std::sqrt(dsq));
     if (dnorm < 0.5 * rho) {
         ntrits = -1;
         /* Computing 2nd power */
-        d__1 = 10.0 * rho;
-        distsq = d__1 * d__1;
+        distsq = square(10.0 * rho);
         if (nf <= nfsav + 2) {
             goto L650;
         }
@@ -2235,15 +2040,13 @@ L60:
         /*     of likely improvements to the model within distance HALF*RHO of XOPT. */
 
         /* Computing MAX */
-        d__1 = std::max(diffa,diffb);
-        errbig = std::max(d__1,diffc);
+        errbig = std::max(std::max(diffa, diffb), diffc);
         frhosq = rho * .125 * rho;
         if (crvmin > 0.0 && errbig > frhosq * crvmin) {
             goto L650;
         }
         bdtol = errbig / rho;
-        i__1 = n;
-        for (long j = 1; j <= i__1; ++j) {
+        for (long j = 1; j <= n; ++j) {
             bdtest = bdtol;
             if (xnew[j] == sl[j]) {
                 bdtest = w[j];
@@ -2253,12 +2056,10 @@ L60:
             }
             if (bdtest < bdtol) {
                 curv = hq[(j + j * j) / 2];
-                i__2 = npt;
-                for (long k = 1; k <= i__2; ++k) {
+                for (long k = 1; k <= npt; ++k) {
                     /* L70: */
                     /* Computing 2nd power */
-                    d__1 = xpt[k + j * xpt_dim1];
-                    curv += pq[k] * (d__1 * d__1);
+                    curv += pq[k] * square(xpt[k + j * xpt_dim1]);
                 }
                 bdtest += 0.5 * curv * rho;
                 if (bdtest < bdtol) {
@@ -2281,24 +2082,20 @@ L90:
     if (dsq <= xoptsq * .001) {
         fracsq = xoptsq * .25;
         sumpq = 0.0;
-        i__1 = npt;
-        for (long k = 1; k <= i__1; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             sumpq += pq[k];
             sum = -0.5 * xoptsq;
-            i__2 = n;
-            for (long i__ = 1; i__ <= i__2; ++i__) {
+            for (long i__ = 1; i__ <= n; ++i__) {
                 /* L100: */
                 sum += xpt[k + i__ * xpt_dim1] * xopt[i__];
             }
             w[npt + k] = sum;
             temp = fracsq - 0.5 * sum;
-            i__2 = n;
-            for (long i__ = 1; i__ <= i__2; ++i__) {
+            for (long i__ = 1; i__ <= n; ++i__) {
                 w[i__] = bmat[k + i__ * bmat_dim1];
                 vlag[i__] = sum * xpt[k + i__ * xpt_dim1] + temp * xopt[i__];
                 const long ip = npt + i__;
-                i__3 = i__;
-                for (long j = 1; j <= i__3; ++j) {
+                for (long j = 1; j <= i__; ++j) {
                     /* L110: */
                     bmat[ip + j * bmat_dim1] = bmat[ip + j * bmat_dim1] + w[
                         i__] * vlag[j] + vlag[i__] * w[j];
@@ -2308,38 +2105,31 @@ L90:
 
         /*     Then the revisions of BMAT that depend on ZMAT are calculated. */
 
-        i__3 = nptm;
-        for (long jj = 1; jj <= i__3; ++jj) {
+        for (long jj = 1; jj <= nptm; ++jj) {
             sumz = 0.0;
             sumw = 0.0;
-            i__2 = npt;
-            for (long k = 1; k <= i__2; ++k) {
+            for (long k = 1; k <= npt; ++k) {
                 sumz += zmat[k + jj * zmat_dim1];
                 vlag[k] = w[npt + k] * zmat[k + jj * zmat_dim1];
                 /* L120: */
                 sumw += vlag[k];
             }
-            i__2 = n;
-            for (long j = 1; j <= i__2; ++j) {
+            for (long j = 1; j <= n; ++j) {
                 sum = (fracsq * sumz - 0.5 * sumw) * xopt[j];
-                i__1 = npt;
-                for (long k = 1; k <= i__1; ++k) {
+                for (long k = 1; k <= npt; ++k) {
                     /* L130: */
                     sum += vlag[k] * xpt[k + j * xpt_dim1];
                 }
                 w[j] = sum;
-                i__1 = npt;
-                for (long k = 1; k <= i__1; ++k) {
+                for (long k = 1; k <= npt; ++k) {
                     /* L140: */
                     bmat[k + j * bmat_dim1] += sum * zmat[k + jj * zmat_dim1];
                 }
             }
-            i__1 = n;
-            for (long i__ = 1; i__ <= i__1; ++i__) {
+            for (long i__ = 1; i__ <= n; ++i__) {
                 const long ip = i__ + npt;
                 temp = w[i__];
-                i__2 = i__;
-                for (long j = 1; j <= i__2; ++j) {
+                for (long j = 1; j <= i__; ++j) {
                     /* L150: */
                     bmat[ip + j * bmat_dim1] += temp * w[j];
                 }
@@ -2350,17 +2140,14 @@ L90:
         /*     to the second derivative parameters of the quadratic model. */
 
         ih = 0;
-        i__2 = n;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= n; ++j) {
             w[j] = -0.5 * sumpq * xopt[j];
-            i__1 = npt;
-            for (long k = 1; k <= i__1; ++k) {
+            for (long k = 1; k <= npt; ++k) {
                 w[j] += pq[k] * xpt[k + j * xpt_dim1];
                 /* L160: */
                 xpt[k + j * xpt_dim1] -= xopt[j];
             }
-            i__1 = j;
-            for (long i__ = 1; i__ <= i__1; ++i__) {
+            for (long i__ = 1; i__ <= j; ++i__) {
                 ++ih;
                 hq[ih] = hq[ih] + w[i__] * xopt[j] + xopt[i__] * w[j];
                 /* L170: */
@@ -2368,8 +2155,7 @@ L90:
                     bmat_dim1];
             }
         }
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             xbase[i__] += xopt[i__];
             xnew[i__] -= xopt[i__];
             sl[i__] -= xopt[i__];
@@ -2407,13 +2193,11 @@ L190:
 
     xoptsq = 0.0;
     if (kopt != kbase) {
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             xopt[i__] = xpt[kopt + i__ * xpt_dim1];
             /* L200: */
             /* Computing 2nd power */
-            d__1 = xopt[i__];
-            xoptsq += d__1 * d__1;
+            xoptsq += square(xopt[i__]);
         }
     }
     if (nf < 0) {
@@ -2446,8 +2230,7 @@ L210:
     altmov(n, npt, &xpt[xpt_offset], &xopt[1], &bmat[bmat_offset], &zmat[zmat_offset],
             ndim, &sl[1], &su[1], kopt, knew, adelt, &xnew[1],
             &xalt[1], alpha, cauchy, &w[1], &w[np], &w[ndim + 1]);
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         /* L220: */
         d__[i__] = xnew[i__] - xopt[i__];
     }
@@ -2457,13 +2240,11 @@ L210:
     /*     use when VQUAD is calculated. */
 
 L230:
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         suma = 0.0;
         sumb = 0.0;
         sum = 0.0;
-        i__2 = n;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= n; ++j) {
             suma += xpt[k + j * xpt_dim1] * d__[j];
             sumb += xpt[k + j * xpt_dim1] * xopt[j];
             /* L240: */
@@ -2475,17 +2256,14 @@ L230:
         w[npt + k] = suma;
     }
     beta = 0.0;
-    i__1 = nptm;
-    for (long jj = 1; jj <= i__1; ++jj) {
+    for (long jj = 1; jj <= nptm; ++jj) {
         sum = 0.0;
-        i__2 = npt;
-        for (long k = 1; k <= i__2; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L260: */
             sum += zmat[k + jj * zmat_dim1] * w[k];
         }
         beta -= sum * sum;
-        i__2 = npt;
-        for (long k = 1; k <= i__2; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L270: */
             vlag[k] += sum * zmat[k + jj * zmat_dim1];
         }
@@ -2493,21 +2271,17 @@ L230:
     dsq = 0.0;
     bsum = 0.0;
     dx = 0.0;
-    i__2 = n;
-    for (long j = 1; j <= i__2; ++j) {
+    for (long j = 1; j <= n; ++j) {
         /* Computing 2nd power */
-        d__1 = d__[j];
-        dsq += d__1 * d__1;
+        dsq += square(d__[j]);
         sum = 0.0;
-        i__1 = npt;
-        for (long k = 1; k <= i__1; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L280: */
             sum += w[k] * bmat[k + j * bmat_dim1];
         }
         bsum += sum * d__[j];
         jp = npt + j;
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             /* L290: */
             sum += bmat[jp + i__ * bmat_dim1] * d__[i__];
         }
@@ -2525,11 +2299,9 @@ L230:
 
     if (ntrits == 0) {
         /* Computing 2nd power */
-        d__1 = vlag[knew];
-        denom = d__1 * d__1 + alpha * beta;
+        denom = square(vlag[knew]) + alpha * beta;
         if (denom < cauchy && cauchy > 0.0) {
-            i__2 = n;
-            for (long i__ = 1; i__ <= i__2; ++i__) {
+            for (long i__ = 1; i__ <= n; ++i__) {
                 xnew[i__] = xalt[i__];
                 /* L310: */
                 d__[i__] = xnew[i__] - xopt[i__];
@@ -2538,8 +2310,7 @@ L230:
             goto L230;
         }
         /* Computing 2nd power */
-        d__1 = vlag[knew];
-        if (denom <= 0.5 * (d__1 * d__1)) {
+        if (denom <= 0.5 * square(vlag[knew])) {
             if (nf > nresc) {
                 goto L190;
             }
@@ -2558,35 +2329,27 @@ L230:
         scaden = 0.0;
         biglsq = 0.0;
         knew = 0;
-        i__2 = npt;
-        for (long k = 1; k <= i__2; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             if (k == kopt) {
                 goto L350;
             }
             hdiag = 0.0;
-            i__1 = nptm;
-            for (long jj = 1; jj <= i__1; ++jj) {
+            for (long jj = 1; jj <= nptm; ++jj) {
                 /* L330: */
                 /* Computing 2nd power */
-                d__1 = zmat[k + jj * zmat_dim1];
-                hdiag += d__1 * d__1;
+                hdiag += square(zmat[k + jj * zmat_dim1]);
             }
             /* Computing 2nd power */
-            d__1 = vlag[k];
-            den = beta * hdiag + d__1 * d__1;
+            den = beta * hdiag + square(vlag[k]);
             distsq = 0.0;
-            i__1 = n;
-            for (long j = 1; j <= i__1; ++j) {
+            for (long j = 1; j <= n; ++j) {
                 /* L340: */
                 /* Computing 2nd power */
-                d__1 = xpt[k + j * xpt_dim1] - xopt[j];
-                distsq += d__1 * d__1;
+                distsq += square(xpt[k + j * xpt_dim1] - xopt[j]);
             }
             /* Computing MAX */
             /* Computing 2nd power */
-            d__3 = distsq / delsq;
-            d__1 = 1.0, d__2 = d__3 * d__3;
-            temp = std::max(d__1,d__2);
+            temp = std::max(1.0, square(distsq / delsq));
             if (temp * den > scaden) {
                 scaden = temp * den;
                 knew = k;
@@ -2594,9 +2357,7 @@ L230:
             }
             /* Computing MAX */
             /* Computing 2nd power */
-            d__3 = vlag[k];
-            d__1 = biglsq, d__2 = temp * (d__3 * d__3);
-            biglsq = std::max(d__1,d__2);
+            biglsq = std::max(biglsq, temp * square(vlag[k]));
 L350:
             ;
         }
@@ -2617,13 +2378,10 @@ L350:
     /*       the limit on the number of calculations of F has been reached. */
 
 L360:
-    i__2 = n;
-    for (long i__ = 1; i__ <= i__2; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         /* Computing MIN */
         /* Computing MAX */
-        d__3 = xl[i__], d__4 = xbase[i__] + xnew[i__];
-        d__1 = std::max(d__3,d__4), d__2 = xu[i__];
-        x[i__] = std::min(d__1,d__2);
+        x[i__] = std::min(std::max(xl[i__], xbase[i__] + xnew[i__]), xu[i__]);
         if (xnew[i__] == sl[i__]) {
             x[i__] = xl[i__];
         }
@@ -2650,11 +2408,9 @@ L360:
     fopt = fval[kopt];
     vquad = 0.0;
     ih = 0;
-    i__2 = n;
-    for (long j = 1; j <= i__2; ++j) {
+    for (long j = 1; j <= n; ++j) {
         vquad += d__[j] * gopt[j];
-        i__1 = j;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= j; ++i__) {
             ++ih;
             temp = d__[i__] * d__[j];
             if (i__ == j) {
@@ -2664,12 +2420,10 @@ L360:
             vquad += hq[ih] * temp;
         }
     }
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         /* L420: */
         /* Computing 2nd power */
-        d__1 = w[npt + k];
-        vquad += 0.5 * pq[k] * (d__1 * d__1);
+        vquad += 0.5 * pq[k] * square(w[npt + k]);
     }
     diff = f - fopt - vquad;
     diffc = diffb;
@@ -2689,16 +2443,13 @@ L360:
         ratio = (f - fopt) / vquad;
         if (ratio <= 0.1) {
             /* Computing MIN */
-            d__1 = 0.5 * delta;
-            delta = std::min(d__1,dnorm);
+            delta = std::min(0.5 * delta, dnorm);
         } else if (ratio <= .7) {
             /* Computing MAX */
-            d__1 = 0.5 * delta;
-            delta = std::max(d__1,dnorm);
+            delta = std::max(0.5 * delta, dnorm);
         } else {
             /* Computing MAX */
-            d__1 = 0.5 * delta, d__2 = dnorm + dnorm;
-            delta = std::max(d__1,d__2);
+            delta = std::max(0.5 * delta, dnorm + dnorm);
         }
         if (delta <= rho * 1.5) {
             delta = rho;
@@ -2713,32 +2464,24 @@ L360:
             scaden = 0.0;
             biglsq = 0.0;
             knew = 0;
-            i__1 = npt;
-            for (long k = 1; k <= i__1; ++k) {
+            for (long k = 1; k <= npt; ++k) {
                 hdiag = 0.0;
-                i__2 = nptm;
-                for (long jj = 1; jj <= i__2; ++jj) {
+                for (long jj = 1; jj <= nptm; ++jj) {
                     /* L440: */
                     /* Computing 2nd power */
-                    d__1 = zmat[k + jj * zmat_dim1];
-                    hdiag += d__1 * d__1;
+                    hdiag += square(zmat[k + jj * zmat_dim1]);
                 }
                 /* Computing 2nd power */
-                d__1 = vlag[k];
-                den = beta * hdiag + d__1 * d__1;
+                den = beta * hdiag + square(vlag[k]);
                 distsq = 0.0;
-                i__2 = n;
-                for (long j = 1; j <= i__2; ++j) {
+                for (long j = 1; j <= n; ++j) {
                     /* L450: */
                     /* Computing 2nd power */
-                    d__1 = xpt[k + j * xpt_dim1] - xnew[j];
-                    distsq += d__1 * d__1;
+                    distsq += square(xpt[k + j * xpt_dim1] - xnew[j]);
                 }
                 /* Computing MAX */
                 /* Computing 2nd power */
-                d__3 = distsq / delsq;
-                d__1 = 1.0, d__2 = d__3 * d__3;
-                temp = std::max(d__1,d__2);
+                temp = std::max(1.0, square(distsq / delsq));
                 if (temp * den > scaden) {
                     scaden = temp * den;
                     knew = k;
@@ -2747,9 +2490,7 @@ L360:
                 /* L460: */
                 /* Computing MAX */
                 /* Computing 2nd power */
-                d__3 = vlag[k];
-                d__1 = biglsq, d__2 = temp * (d__3 * d__3);
-                biglsq = std::max(d__1,d__2);
+                biglsq = std::max(biglsq, temp * square(vlag[k]));
             }
             if (scaden <= 0.5 * biglsq) {
                 knew = ksav;
@@ -2766,21 +2507,17 @@ L360:
     ih = 0;
     pqold = pq[knew];
     pq[knew] = 0.0;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         temp = pqold * xpt[knew + i__ * xpt_dim1];
-        i__2 = i__;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= i__; ++j) {
             ++ih;
             /* L470: */
             hq[ih] += temp * xpt[knew + j * xpt_dim1];
         }
     }
-    i__2 = nptm;
-    for (long jj = 1; jj <= i__2; ++jj) {
+    for (long jj = 1; jj <= nptm; ++jj) {
         temp = diff * zmat[knew + jj * zmat_dim1];
-        i__1 = npt;
-        for (long k = 1; k <= i__1; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             /* L480: */
             pq[k] += temp * zmat[k + jj * zmat_dim1];
         }
@@ -2790,35 +2527,29 @@ L360:
     /*     the old XOPT that are caused by the updating of the quadratic model. */
 
     fval[knew] = f;
-    i__1 = n;
-    for (long i__ = 1; i__ <= i__1; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         xpt[knew + i__ * xpt_dim1] = xnew[i__];
         /* L490: */
         w[i__] = bmat[knew + i__ * bmat_dim1];
     }
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         suma = 0.0;
-        i__2 = nptm;
-        for (long jj = 1; jj <= i__2; ++jj) {
+        for (long jj = 1; jj <= nptm; ++jj) {
             /* L500: */
             suma += zmat[knew + jj * zmat_dim1] * zmat[k + jj * zmat_dim1];
         }
         sumb = 0.0;
-        i__2 = n;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= n; ++j) {
             /* L510: */
             sumb += xpt[k + j * xpt_dim1] * xopt[j];
         }
         temp = suma * sumb;
-        i__2 = n;
-        for (long i__ = 1; i__ <= i__2; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             /* L520: */
             w[i__] += temp * xpt[k + i__ * xpt_dim1];
         }
     }
-    i__2 = n;
-    for (long i__ = 1; i__ <= i__2; ++i__) {
+    for (long i__ = 1; i__ <= n; ++i__) {
         /* L530: */
         gopt[i__] += diff * w[i__];
     }
@@ -2829,14 +2560,11 @@ L360:
         kopt = knew;
         xoptsq = 0.0;
         ih = 0;
-        i__2 = n;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= n; ++j) {
             xopt[j] = xnew[j];
             /* Computing 2nd power */
-            d__1 = xopt[j];
-            xoptsq += d__1 * d__1;
-            i__1 = j;
-            for (long i__ = 1; i__ <= i__1; ++i__) {
+            xoptsq += square(xopt[j]);
+            for (long i__ = 1; i__ <= j; ++i__) {
                 ++ih;
                 if (i__ < j) {
                     gopt[j] += hq[ih] * d__[i__];
@@ -2845,17 +2573,14 @@ L360:
                 gopt[i__] += hq[ih] * d__[j];
             }
         }
-        i__1 = npt;
-        for (long k = 1; k <= i__1; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             temp = 0.0;
-            i__2 = n;
-            for (long j = 1; j <= i__2; ++j) {
+            for (long j = 1; j <= n; ++j) {
                 /* L550: */
                 temp += xpt[k + j * xpt_dim1] * d__[j];
             }
             temp = pq[k] * temp;
-            i__2 = n;
-            for (long i__ = 1; i__ <= i__2; ++i__) {
+            for (long i__ = 1; i__ <= n; ++i__) {
                 /* L560: */
                 gopt[i__] += temp * xpt[k + i__ * xpt_dim1];
             }
@@ -2867,31 +2592,25 @@ L360:
     /*     into VLAG(NPT+I), I=1,2,...,N. */
 
     if (ntrits > 0) {
-        i__2 = npt;
-        for (long k = 1; k <= i__2; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             vlag[k] = fval[k] - fval[kopt];
             /* L570: */
             w[k] = 0.0;
         }
-        i__2 = nptm;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= nptm; ++j) {
             sum = 0.0;
-            i__1 = npt;
-            for (long k = 1; k <= i__1; ++k) {
+            for (long k = 1; k <= npt; ++k) {
                 /* L580: */
                 sum += zmat[k + j * zmat_dim1] * vlag[k];
             }
-            i__1 = npt;
-            for (long k = 1; k <= i__1; ++k) {
+            for (long k = 1; k <= npt; ++k) {
                 /* L590: */
                 w[k] += sum * zmat[k + j * zmat_dim1];
             }
         }
-        i__1 = npt;
-        for (long k = 1; k <= i__1; ++k) {
+        for (long k = 1; k <= npt; ++k) {
             sum = 0.0;
-            i__2 = n;
-            for (long j = 1; j <= i__2; ++j) {
+            for (long j = 1; j <= n; ++j) {
                 /* L600: */
                 sum += xpt[k + j * xpt_dim1] * xopt[j];
             }
@@ -2901,37 +2620,29 @@ L360:
         }
         gqsq = 0.0;
         gisq = 0.0;
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             sum = 0.0;
-            i__2 = npt;
-            for (long k = 1; k <= i__2; ++k) {
+            for (long k = 1; k <= npt; ++k) {
                 /* L620: */
                 sum = sum + bmat[k + i__ * bmat_dim1] * vlag[k] + xpt[k + i__
                     * xpt_dim1] * w[k];
             }
             if (xopt[i__] == sl[i__]) {
                 /* Computing MIN */
-                d__2 = 0.0, d__3 = gopt[i__];
                 /* Computing 2nd power */
-                d__1 = std::min(d__2,d__3);
-                gqsq += d__1 * d__1;
                 /* Computing 2nd power */
-                d__1 = std::min(0.0,sum);
-                gisq += d__1 * d__1;
+                gqsq += square(std::min(0.0, gopt[i__]));
+                /* Computing 2nd power */
+                gisq += square(std::min(0.0, sum));
             } else if (xopt[i__] == su[i__]) {
                 /* Computing MAX */
-                d__2 = 0.0, d__3 = gopt[i__];
                 /* Computing 2nd power */
-                d__1 = std::max(d__2,d__3);
-                gqsq += d__1 * d__1;
+                gqsq += square(std::max(0.0, gopt[i__]));
                 /* Computing 2nd power */
-                d__1 = std::max(0.0,sum);
-                gisq += d__1 * d__1;
+                gisq += square(std::max(0.0, sum));
             } else {
                 /* Computing 2nd power */
-                d__1 = gopt[i__];
-                gqsq += d__1 * d__1;
+                gqsq += square(gopt[i__]);
                 gisq += sum * sum;
             }
             /* L630: */
@@ -2946,8 +2657,8 @@ L360:
             itest = 0;
         }
         if (itest >= 3) {
-            i__1 = std::max(npt,nh);
-            for (long i__ = 1; i__ <= i__1; ++i__) {
+            const long i_n = std::max(npt, nh);
+            for (long i__ = 1; i__ <= i_n; ++i__) {
                 if (i__ <= n) {
                     gopt[i__] = vlag[npt + i__];
                 }
@@ -2979,22 +2690,16 @@ L360:
 
     /* Computing MAX */
     /* Computing 2nd power */
-    d__3 = 2.0 * delta;
     /* Computing 2nd power */
-    d__4 = 10.0 * rho;
-    d__1 = d__3 * d__3, d__2 = d__4 * d__4;
-    distsq = std::max(d__1,d__2);
+    distsq = std::max(square(2.0 * delta), square(10.0 * rho));
 L650:
     knew = 0;
-    i__1 = npt;
-    for (long k = 1; k <= i__1; ++k) {
+    for (long k = 1; k <= npt; ++k) {
         sum = 0.0;
-        i__2 = n;
-        for (long j = 1; j <= i__2; ++j) {
+        for (long j = 1; j <= n; ++j) {
             /* L660: */
             /* Computing 2nd power */
-            d__1 = xpt[k + j * xpt_dim1] - xopt[j];
-            sum += d__1 * d__1;
+            sum += square(xpt[k + j * xpt_dim1] - xopt[j]);
         }
         if (sum > distsq) {
             knew = k;
@@ -3013,8 +2718,7 @@ L650:
         dist = std::sqrt(distsq);
         if (ntrits == -1) {
             /* Computing MIN */
-            d__1 = 0.1 * delta, d__2 = 0.5 * dist;
-            delta = std::min(d__1,d__2);
+            delta = std::min(0.1 * delta, 0.5 * dist);
             if (delta <= rho * 1.5) {
                 delta = rho;
             }
@@ -3022,9 +2726,7 @@ L650:
         ntrits = 0;
         /* Computing MAX */
         /* Computing MIN */
-        d__2 = 0.1 * dist;
-        d__1 = std::min(d__2,delta);
-        adelt = std::max(d__1,rho);
+        adelt = std::max(std::min(0.1 * dist, delta), rho);
         dsq = adelt * adelt;
         goto L90;
     }
@@ -3066,13 +2768,10 @@ L680:
     }
 L720:
     if (fval[kopt] <= fsave) {
-        i__1 = n;
-        for (long i__ = 1; i__ <= i__1; ++i__) {
+        for (long i__ = 1; i__ <= n; ++i__) {
             /* Computing MIN */
             /* Computing MAX */
-            d__3 = xl[i__], d__4 = xbase[i__] + xopt[i__];
-            d__1 = std::max(d__3,d__4), d__2 = xu[i__];
-            x[i__] = std::min(d__1,d__2);
+            x[i__] = std::min(std::max(xl[i__], xbase[i__] + xopt[i__]), xu[i__]);
             if (xopt[i__] == sl[i__]) {
                 x[i__] = xl[i__];
             }
@@ -3091,16 +2790,6 @@ template <class Function>
 double bobyqa_impl(const Function &function, long n, long npt, double *x,
         const double *xl, const double *xu, double rhobeg, double rhoend,
         long maxfun, double *w) {
-    /* System generated locals */
-    long i__1;
-    double d__1, d__2;
-
-    /* Local variables */
-    long id_, np, iw, igo, ihq, ixb, ixa, ifv, isl, jsl, ipq, ivl, ixn, ixo, ixp, isu, jsu, ndim;
-    double temp;
-    long ibmat, izmat;
-
-
     /*     This subroutine seeks the least value of a function of many variables, */
     /*     by applying a trust region method that forms quadratic models by */
     /*     interpolation. There is usually some freedom in the interpolation */
@@ -3138,12 +2827,12 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
     --x;
 
     /* Function Body */
-    np = n + 1;
+    const long np = n + 1;
 
     /*     Return if the value of NPT is unacceptable. */
     if (npt < n + 2 || npt > (n + 2) * np / 2) {
         DEBUG_LOG("Return from BOBYQA because NPT is not in the required interval.\n");
-        goto L40;
+        return 0.0;
     }
 
     /*     Partition the working space array, so that different parts of it can */
@@ -3151,23 +2840,23 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
     /*     requires the first (NPT+2)*(NPT+N)+3*N*(N+5)/2 elements of W plus the */
     /*     space that is taken by the last array in the argument list of BOBYQB. */
 
-    ndim = npt + n;
-    ixb = 1;
-    ixp = ixb + n;
-    ifv = ixp + n * npt;
-    ixo = ifv + npt;
-    igo = ixo + n;
-    ihq = igo + n;
-    ipq = ihq + n * np / 2;
-    ibmat = ipq + npt;
-    izmat = ibmat + ndim * n;
-    isl = izmat + npt * (npt - np);
-    isu = isl + n;
-    ixn = isu + n;
-    ixa = ixn + n;
-    id_ = ixa + n;
-    ivl = id_ + n;
-    iw = ivl + ndim;
+    const long ndim = npt + n;
+    const long ixb = 1;
+    const long ixp = ixb + n;
+    const long ifv = ixp + n * npt;
+    const long ixo = ifv + npt;
+    const long igo = ixo + n;
+    const long ihq = igo + n;
+    const long ipq = ihq + n * np / 2;
+    const long ibmat = ipq + npt;
+    const long izmat = ibmat + ndim * n;
+    const long isl = izmat + npt * (npt - np);
+    const long isu = isl + n;
+    const long ixn = isu + n;
+    const long ixa = ixn + n;
+    const long id_ = ixa + n;
+    const long ivl = id_ + n;
+    const long iw = ivl + ndim;
 
     /*     Return if there is insufficient space between the bounds. Modify the */
     /*     initial X if necessary in order to avoid conflicts between the bounds */
@@ -3176,16 +2865,15 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
     /*     partitions of W, in order to provide useful and exact information about */
     /*     components of X that become within distance RHOBEG from their bounds. */
 
-    i__1 = n;
-    for (long j = 1; j <= i__1; ++j) {
-        temp = xu[j] - xl[j];
+    for (long j = 1; j <= n; ++j) {
+        const double temp = xu[j] - xl[j];
         if (temp < rhobeg + rhobeg) {
             DEBUG_LOG("Return from BOBYQA because one of the differences in x_lower and x_upper "
                       "is less than 2*rho_begin.\n");
-            goto L40;
+            return 0.0;
         }
-        jsl = isl + j - 1;
-        jsu = jsl + n;
+        const long jsl = isl + j - 1;
+        const long jsu = jsl + n;
         w[jsl] = xl[j] - x[j];
         w[jsu] = xu[j] - x[j];
         if (w[jsl] >= -(rhobeg)) {
@@ -3197,8 +2885,7 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
                 x[j] = xl[j] + rhobeg;
                 w[jsl] = -(rhobeg);
                 /* Computing MAX */
-                d__1 = xu[j] - x[j];
-                w[jsu] = std::max(d__1,rhobeg);
+                w[jsu] = std::max(xu[j] - x[j], rhobeg);
             }
         } else if (w[jsu] <= rhobeg) {
             if (w[jsu] <= 0.0) {
@@ -3208,8 +2895,7 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
             } else {
                 x[j] = xu[j] - rhobeg;
                 /* Computing MIN */
-                d__1 = xl[j] - x[j], d__2 = -(rhobeg);
-                w[jsl] = std::min(d__1,d__2);
+                w[jsl] = std::min(xl[j] - x[j], -rhobeg);
                 w[jsu] = rhobeg;
             }
         }
@@ -3222,8 +2908,6 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
             ixb], &w[ixp], &w[ifv], &w[ixo], &w[igo], &w[ihq], &w[ipq], &w[
             ibmat], &w[izmat], ndim, &w[isl], &w[isu], &w[ixn], &w[ixa], &w[
             id_], &w[ivl], &w[iw]);
-    L40:
-    return 0.0;
 }
 
 } // namespace
