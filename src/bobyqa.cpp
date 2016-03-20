@@ -505,9 +505,9 @@ L150:
     redmax = 0.0;
     isav = 0;
     redsav = 0.0;
-    iu = (long) (angbd * 17. + 3.1);
+    iu = long(angbd * 17. + 3.1);
     for (long i__ = 1; i__ <= iu; ++i__) {
-        angt = angbd * (double) i__ / (double) iu;
+        angt = angbd * double(i__) / double(iu);
         sth = (angt + angt) / (1.0 + angt * angt);
         temp = shs + angt * (angt * dhd - dhs - dhs);
         rednew = sth * (angt * dredg - sredg - 0.5 * sth * temp);
@@ -530,7 +530,7 @@ L150:
     }
     if (isav < iu) {
         temp = (rdnext - rdprev) / (redmax + redmax - rdprev - rdnext);
-        angt = angbd * ((double) isav + 0.5 * temp) / (double) iu;
+        angt = angbd * (double(isav) + 0.5 * temp) / double(iu);
     }
     cth = (1.0 - angt * angt) / (1.0 + angt * angt);
     sth = (angt + angt) / (1.0 + angt * angt);
@@ -809,9 +809,9 @@ void rescue(
     for (long j = 1; j <= n; ++j) {
         jp = j + 1;
         jpn = jp + n;
-        ptsid[jp] = (double) j + sfrac;
+        ptsid[jp] = double(j + sfrac);
         if (jpn <= npt) {
-            ptsid[jpn] = (double) j / (double) np + sfrac;
+            ptsid[jpn] = double(j) / double(np) + sfrac;
             temp = 1.0 / (ptsaux[(j << 1) + 1] - ptsaux[(j << 1) + 2]);
             bmat[jp + j * bmat_dim1] = -temp + 1.0 / ptsaux[(j << 1) + 1];
             bmat[jpn + j * bmat_dim1] = temp + 1.0 / ptsaux[(j << 1) + 2];
@@ -833,15 +833,14 @@ void rescue(
 
     if (npt >= n + np) {
         for (long k = np << 1; k <= npt; ++k) {
-            iw = (long) (((double) (k - np) - 0.5) / (double) (n)
+            iw = long((double(k - np) - 0.5) / double(n)
             );
             const long ip = k - np - iw * n;
             iq = ip + iw;
             if (iq > n) {
                 iq -= n;
             }
-            ptsid[k] = (double) ip + (double) iq / (double) np +
-                sfrac;
+            ptsid[k] = double(ip) + double(iq) / double(np) + sfrac;
             temp = 1.0 / (ptsaux[(ip << 1) + 1] * ptsaux[(iq << 1) + 1]);
             zmat[(k - np) * zmat_dim1 + 1] = temp;
             zmat[ip + 1 + (k - np) * zmat_dim1] = -temp;
@@ -933,8 +932,7 @@ L120:
             if (ip > 0) {
                 sum = w[npt + ip] * ptsaux[(ip << 1) + 1];
             }
-            iq = (long) ((double) np * ptsid[k] - (double) (ip *
-                                                                       np));
+            iq = long(double(np) * ptsid[k] - double(ip * np));
             if (iq > 0) {
                 iw = 1;
                 if (ip == 0) {
@@ -1061,8 +1059,7 @@ L260:
         {
 
         const long ip = long(ptsid[kpt]);
-        iq = (long) ((double) np * ptsid[kpt] - (double) (ip * np))
-            ;
+        iq = long(double(np) * ptsid[kpt] - double(ip * np));
         if (ip > 0) {
             xp = ptsaux[(ip << 1) + 1];
             xpt[kpt + ip * xpt_dim1] = xp;
@@ -1148,8 +1145,7 @@ L260:
                 pq[k] += temp;
             } else {
                 const long ip = long(ptsid[k]);
-                iq = (long) ((double) np * ptsid[k] - (double) (ip
-                                                                           * np));
+                iq = long(double(np) * ptsid[k] - double(ip * np));
                 ihq = (iq * iq + iq) / 2;
                 if (ip == 0) {
                     /* Computing 2nd power */
