@@ -12,6 +12,9 @@
 
 namespace {
 
+const double sqrt_2 = std::sqrt(2.0);
+const double sqrt_0_5 = std::sqrt(0.5);
+
 void update(
     const long n,
     const long npt,
@@ -922,7 +925,7 @@ void rescue(
             bmat[jpn + j * bmat_dim1] = temp + 1.0 / ptsaux[(j << 1) + 2];
             bmat[j * bmat_dim1 + 1] = -bmat[jp + j * bmat_dim1] - bmat[jpn +
                 j * bmat_dim1];
-            zmat[j * zmat_dim1 + 1] = std::sqrt(2.) / (d__1 = ptsaux[(j << 1) + 1]
+            zmat[j * zmat_dim1 + 1] = sqrt_2 / (d__1 = ptsaux[(j << 1) + 1]
                                                   * ptsaux[(j << 1) + 2], std::abs(d__1));
             zmat[jp + j * zmat_dim1] = zmat[j * zmat_dim1 + 1] * ptsaux[(j <<
                                                                          1) + 2] * temp;
@@ -1544,8 +1547,8 @@ L50:
                 xpt_dim1];
             bmat[nf - n + nfx * bmat_dim1] = -bmat[nfx * bmat_dim1 + 1] -
                 bmat[nf + nfx * bmat_dim1];
-            zmat[nfx * zmat_dim1 + 1] = std::sqrt(2.0) / (stepa * stepb);
-            zmat[nf + nfx * zmat_dim1] = std::sqrt(0.5) / rhosq;
+            zmat[nfx * zmat_dim1 + 1] = sqrt_2 / (stepa * stepb);
+            zmat[nf + nfx * zmat_dim1] = sqrt_0_5 / rhosq;
             zmat[nf - n + nfx * zmat_dim1] = -zmat[nfx * zmat_dim1 + 1] -
                 zmat[nf + nfx * zmat_dim1];
         }
