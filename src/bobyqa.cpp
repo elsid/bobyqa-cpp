@@ -26,11 +26,11 @@ void update(
     double *bmat,
     double *zmat,
     const long ndim,
-    double *vlag,
+    double *const vlag,
     const double beta,
     const double denom,
     const long knew,
-    double *w
+    double *const w
 )
 {
     /*     The arrays BMAT and ZMAT are updated, as required by the new position */
@@ -51,8 +51,6 @@ void update(
     const long bmat_dim1 = ndim;
     const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
-    --vlag;
-    --w;
 
     /* Function Body */
     const long nptm = npt - n - 1;
@@ -131,22 +129,22 @@ void trsbox(
     const long n,
     const long npt,
     const double *xpt,
-    const double *xopt,
-    const double *gopt,
-    const double *hq,
-    const double *pq,
-    const double *sl,
-    const double *su,
+    const double *const xopt,
+    const double *const gopt,
+    const double *const hq,
+    const double *const pq,
+    const double *const sl,
+    const double *const su,
     const double delta,
-    double *xnew,
-    double *d__,
-    double *gnew,
-    double *xbdi,
-    double *s,
-    double *hs,
-    double *hred,
-    double *dsq,
-    double *crvmin
+    double *const xnew,
+    double *const d__,
+    double *const gnew,
+    double *const xbdi,
+    double *const s,
+    double *const hs,
+    double *const hred,
+    double *const dsq,
+    double *const crvmin
 )
 {
     /* Local variables */
@@ -209,19 +207,6 @@ void trsbox(
     const long xpt_dim1 = npt;
     const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
-    --xopt;
-    --gopt;
-    --hq;
-    --pq;
-    --sl;
-    --su;
-    --xnew;
-    --d__;
-    --gnew;
-    --xbdi;
-    --s;
-    --hs;
-    --hred;
 
     /* Function Body */
 
@@ -654,28 +639,28 @@ void rescue(
     const Function &function,
     const long n,
     const long npt,
-    const double *xl,
-    const double *xu,
+    const double *const xl,
+    const double *const xu,
     const long maxfun,
-    double *xbase,
+    double *const xbase,
     double *xpt,
-    double *fval,
-    double *xopt,
-    double *gopt,
-    double *hq,
-    double *pq,
+    double *const fval,
+    double *const xopt,
+    double *const gopt,
+    double *const hq,
+    double *const pq,
     double *bmat,
     double *zmat,
     const long ndim,
-    double *sl,
-    double *su,
+    double *const sl,
+    double *const su,
     long& nf,
     const double delta,
     long& kopt,
-    double *vlag,
-    double * ptsaux,
-    double *ptsid,
-    double *w
+    double *const vlag,
+    double *const ptsaux,
+    double *const ptsid,
+    double *const w
 )
 {
     /* Local variables */
@@ -737,23 +722,9 @@ void rescue(
     const long xpt_dim1 = npt;
     const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
-    --xl;
-    --xu;
-    --xbase;
-    --fval;
-    --xopt;
-    --gopt;
-    --hq;
-    --pq;
     const long bmat_dim1 = ndim;
     const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
-    --sl;
-    --su;
-    --vlag;
-    ptsaux -= 3;
-    --ptsid;
-    --w;
 
     /* Function Body */
     const long np = n + 1;
@@ -913,8 +884,8 @@ L80:
         /*     branch to label 350 occurs if all the original points are reinstated. */
         /*     The nonnegative values of W(NDIM+K) are required in the search below. */
 
-        update(n, npt, &bmat[bmat_offset], &zmat[zmat_offset], ndim, &vlag[1],
-                beta, denom, knew, &w[1]);
+        update(n, npt, bmat + bmat_offset, zmat + zmat_offset, ndim, vlag,
+                beta, denom, knew, w);
         if (nrem == 0) {
             goto L350;
         }
@@ -1151,7 +1122,7 @@ L260:
         }
         ++(nf);
         {
-            const double f = function(n, &w[1]);
+            const double f = function(n, w + 1);
             fval[kpt] = f;
             if (f < fval[kopt]) {
                 kopt = kpt;
@@ -1210,22 +1181,22 @@ void prelim(
     const Function &function,
     const long n,
     const long npt,
-    double *x,
-    const double *xl,
-    const double *xu,
+    double *const x,
+    const double *const xl,
+    const double *const xu,
     const double rhobeg,
     const long maxfun,
-    double *xbase,
+    double *const xbase,
     double *xpt,
-    double *fval,
-    double *gopt,
-    double *hq,
-    double *pq,
+    double *const fval,
+    double *const gopt,
+    double *const hq,
+    double *const pq,
     double *bmat,
     double *zmat,
     const long ndim,
-    const double *sl,
-    const double *su,
+    const double *const sl,
+    const double *const su,
     long& nf,
     long& kopt
 )
@@ -1261,19 +1232,9 @@ void prelim(
     const long xpt_dim1 = npt;
     const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
-    --x;
-    --xl;
-    --xu;
-    --xbase;
-    --fval;
-    --gopt;
-    --hq;
-    --pq;
     const long bmat_dim1 = ndim;
     const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
-    --sl;
-    --su;
 
     /* Function Body */
     const double rhosq = rhobeg * rhobeg;
@@ -1365,7 +1326,7 @@ L50:
         }
         /* L60: */
     }
-    const double f = function(n, &x[1]);
+    const double f = function(n, x + 1);
     fval[nf] = f;
     if (nf == 1) {
         fbeg = f;
@@ -1438,22 +1399,22 @@ void altmov(
     const long n,
     const long npt,
     const double *xpt,
-    const double *xopt,
+    const double *const xopt,
     const double *bmat,
     const double *zmat,
     const long ndim,
-    const double *sl,
-    const double *su,
+    const double *const sl,
+    const double *const su,
     const long kopt,
     const long knew,
     const double adelt,
-    double *xnew,
-    double *xalt,
+    double *const xnew,
+    double *const xalt,
     double& alpha,
     double& cauchy,
-    double *glag,
-    double *hcol,
-    double *w
+    double *const glag,
+    double *const hcol,
+    double *const w
 )
 {
     /* Local variables */
@@ -1506,17 +1467,9 @@ void altmov(
     const long xpt_dim1 = npt;
     const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
-    --xopt;
     const long bmat_dim1 = ndim;
     const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
-    --sl;
-    --su;
-    --xnew;
-    --xalt;
-    --glag;
-    --hcol;
-    --w;
 
     /* Function Body */
     for (long k = 1; k <= npt; ++k) {
@@ -1827,29 +1780,29 @@ double bobyqb(
     const Function &function,
     const long n,
     const long npt,
-    double *x,
-    const double *xl,
-    const double *xu,
+    double *const x,
+    const double *const xl,
+    const double *const xu,
     const double rhobeg,
     const double rhoend,
     const long maxfun,
-    double *xbase,
+    double *const xbase,
     double *xpt,
-    double *fval,
-    double *xopt,
-    double *gopt,
-    double *hq,
-    double *pq,
+    double *const fval,
+    double *const xopt,
+    double *const gopt,
+    double *const hq,
+    double *const pq,
     double *bmat,
     double *zmat,
     const long ndim,
-    double *sl,
-    double *su,
-    double *xnew,
-    double *xalt,
-    double *d__,
-    double *vlag,
-    double *w
+    double *const sl,
+    double *const su,
+    double *const xnew,
+    double *const xalt,
+    double *const d__,
+    double *const vlag,
+    double *const w
 )
 {
     /* Local variables */
@@ -1919,25 +1872,9 @@ double bobyqb(
     const long xpt_dim1 = npt;
     const long xpt_offset = 1 + xpt_dim1;
     xpt -= xpt_offset;
-    --x;
-    --xl;
-    --xu;
-    --xbase;
-    --fval;
-    --xopt;
-    --gopt;
-    --hq;
-    --pq;
     const long bmat_dim1 = ndim;
     const long bmat_offset = 1 + bmat_dim1;
     bmat -= bmat_offset;
-    --sl;
-    --su;
-    --xnew;
-    --xalt;
-    --d__;
-    --vlag;
-    --w;
 
     /* Function Body */
     const long np = n + 1;
@@ -1951,9 +1888,9 @@ double bobyqb(
     /*     initial XOPT is set too. The branch to label 720 occurs if MAXFUN is */
     /*     less than NPT. GOPT will be updated if KOPT is different from KBASE. */
 
-    prelim(function, n, npt, &x[1], &xl[1], &xu[1], rhobeg, maxfun, &xbase[1],
-            &xpt[xpt_offset], &fval[1], &gopt[1], &hq[1], &pq[1], &bmat[bmat_offset],
-            &zmat[zmat_offset], ndim, &sl[1], &su[1], nf, kopt);
+    prelim(function, n, npt, x, xl, xu, rhobeg, maxfun, xbase,
+            xpt + xpt_offset, fval, gopt, hq, pq, bmat + bmat_offset,
+            zmat + zmat_offset, ndim, sl, su, nf, kopt);
     xoptsq = 0.0;
     for (long i__ = 1; i__ <= n; ++i__) {
         xopt[i__] = xpt[kopt + i__ * xpt_dim1];
@@ -2020,9 +1957,9 @@ L20:
     /*     label 650 or 680 with NTRITS=-1, instead of calculating F at XNEW. */
 
 L60:
-    trsbox(n, npt, &xpt[xpt_offset], &xopt[1], &gopt[1], &hq[1], &pq[1], &sl[1],
-            &su[1], delta, &xnew[1], &d__[1], &w[1], &w[np], &w[np + n],
-            &w[np + (n << 1)], &w[np + n * 3], &dsq, &crvmin);
+    trsbox(n, npt, xpt + xpt_offset, xopt, gopt, hq, pq, sl,
+            su, delta, xnew, d__, w, w + np - 1, w + np + n - 1,
+            w + np + (n << 1) - 1, w + np + n * 3 - 1, &dsq, &crvmin);
     /* Computing MIN */
     dnorm = std::min(delta, std::sqrt(dsq));
     if (dnorm < 0.5 * rho) {
@@ -2182,10 +2119,10 @@ L90:
 L190:
     nfsav = nf;
     kbase = kopt;
-    rescue(function, n, npt, &xl[1], &xu[1], maxfun, &xbase[1], &xpt[
-            xpt_offset], &fval[1], &xopt[1], &gopt[1], &hq[1], &pq[1], &bmat[
-            bmat_offset], &zmat[zmat_offset], ndim, &sl[1], &su[1], nf, delta,
-            kopt, &vlag[1], &w[1], &w[n + np], &w[ndim + np]);
+    rescue(function, n, npt, xl, xu, maxfun, xbase, xpt +  xpt_offset,
+            fval, xopt, gopt, hq, pq, bmat + bmat_offset,
+            zmat + zmat_offset, ndim, sl, su, nf, delta,
+            kopt, vlag, w - 2, w + n + np - 1, w + ndim + np - 1);
 
     /*     XOPT is updated now in case the branch below to label 720 is taken. */
     /*     Any updating of GOPT occurs after the branch below to label 20, which */
@@ -2227,9 +2164,9 @@ L190:
     /*     going to be made when the denominator is calculated. */
 
 L210:
-    altmov(n, npt, &xpt[xpt_offset], &xopt[1], &bmat[bmat_offset], &zmat[zmat_offset],
-            ndim, &sl[1], &su[1], kopt, knew, adelt, &xnew[1],
-            &xalt[1], alpha, cauchy, &w[1], &w[np], &w[ndim + 1]);
+    altmov(n, npt, xpt + xpt_offset, xopt, bmat + bmat_offset, zmat + zmat_offset,
+            ndim, sl, su, kopt, knew, adelt, xnew,
+            xalt, alpha, cauchy, w, w + np - 1, w + ndim);
     for (long i__ = 1; i__ <= n; ++i__) {
         /* L220: */
         d__[i__] = xnew[i__] - xopt[i__];
@@ -2396,7 +2333,7 @@ L360:
         goto L720;
     }
     ++nf;
-    f = function(n, &x[1]);
+    f = function(n, x + 1);
     if (ntrits == -1) {
         fsave = f;
         goto L720;
@@ -2502,8 +2439,8 @@ L360:
     /*     Update BMAT and ZMAT, so that the KNEW-th interpolation point can be */
     /*     moved. Also update the second derivative terms of the model. */
 
-    update(n, npt, &bmat[bmat_offset], &zmat[zmat_offset], ndim, &vlag[1],
-            beta, denom, knew, &w[1]);
+    update(n, npt, bmat + bmat_offset, zmat + zmat_offset, ndim, vlag,
+            beta, denom, knew, w);
     ih = 0;
     pqold = pq[knew];
     pq[knew] = 0.0;
@@ -2841,8 +2778,7 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
     /*     space that is taken by the last array in the argument list of BOBYQB. */
 
     const long ndim = npt + n;
-    const long ixb = 1;
-    const long ixp = ixb + n;
+    const long ixp = 1 + n;
     const long ifv = ixp + n * npt;
     const long ixo = ifv + npt;
     const long igo = ixo + n;
@@ -2904,10 +2840,10 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
 
     /*     Make the call of BOBYQB. */
 
-    return bobyqb(function, n, npt, &x[1], &xl[1], &xu[1], rhobeg, rhoend, maxfun, &w[
-            ixb], &w[ixp], &w[ifv], &w[ixo], &w[igo], &w[ihq], &w[ipq], &w[
-            ibmat], &w[izmat], ndim, &w[isl], &w[isu], &w[ixn], &w[ixa], &w[
-            id_], &w[ivl], &w[iw]);
+    return bobyqb(function, n, npt, x, xl, xu, rhobeg, rhoend, maxfun, w,
+            w + ixp, w + ifv - 1, w + ixo - 1, w + igo - 1, w + ihq - 1, w + ipq - 1, w + ibmat,
+            w + izmat, ndim, w + isl - 1, w + isu - 1, w + ixn - 1, w + ixa - 1, w + id_ - 1,
+            w + ivl - 1, w + iw - 1);
 }
 
 } // namespace

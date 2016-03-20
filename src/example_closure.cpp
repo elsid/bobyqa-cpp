@@ -8,6 +8,7 @@
 namespace {
 
 void print_array(const std::size_t size, const double *values) {
+    std::cout << '(' << std::size_t(values) << ')';
     std::cout << '[' << size << ']';
     std::for_each(values, values + size, [&] (double value) {
         std::cout << ' ' << value;
@@ -48,6 +49,9 @@ int main(int argc, char **argv) {
 
     auto function = [&] (long n, const double *x) {
         assert(n == 2);
+        std::cout << "function: ";
+        print_array(2, x);
+        std::cout << std::endl;
         ++function_calls_count;
         return -4*x[0]*x[1] + 5*x[0]*x[0] + 8*x[1]*x[1] + 16*sqrt(5.0)*x[0] + 8*sqrt(5.0)*x[1] - 44.0;
     };
