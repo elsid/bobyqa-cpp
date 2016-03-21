@@ -2,3 +2,4 @@ language: cpp
 compiler: clang
 before_script: cmake .
 script: make -j$(nproc)
+after_script: make test -j$(nproc)
