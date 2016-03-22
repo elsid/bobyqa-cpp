@@ -58,7 +58,6 @@ void update(
     for (long k = 1; k <= npt; ++k) {
         for (long j = 1; j <= nptm; ++j) {
             /* L10: */
-            /* Computing MAX */
             ztest = std::max(ztest, std::abs(zmat[k + j * zmat_dim1]));
         }
     }
@@ -68,8 +67,6 @@ void update(
 
     for (long j = 2; j <= nptm; ++j) {
         if (std::abs(zmat[knew + j * zmat_dim1]) > ztest) {
-            /* Computing 2nd power */
-            /* Computing 2nd power */
             const double temp = std::hypot(zmat[knew + zmat_dim1], zmat[knew + j * zmat_dim1]);
             const double tempa = zmat[knew + zmat_dim1] / temp;
             const double tempb = zmat[knew + j * zmat_dim1] / temp;
@@ -260,7 +257,6 @@ L30:
             s[i__] = beta * s[i__] - gnew[i__];
         }
         /* L40: */
-        /* Computing 2nd power */
         stepsq += square(s[i__]);
     }
     if (stepsq == 0.0) {
@@ -286,7 +282,6 @@ L50:
     shs = 0.0;
     for (long i__ = 1; i__ <= n; ++i__) {
         if (xbdi[i__] == 0.0) {
-            /* Computing 2nd power */
             resid -= square(d__[i__]);
             ds += s[i__] * d__[i__];
             shs += s[i__] * hs[i__];
@@ -304,7 +299,6 @@ L50:
     }
     stplen = blen;
     if (shs > 0.0) {
-        /* Computing MIN */
         stplen = std::min(blen, gredsq / shs);
     }
 
@@ -345,13 +339,11 @@ L50:
         for (long i__ = 1; i__ <= n; ++i__) {
             gnew[i__] += stplen * hs[i__];
             if (xbdi[i__] == 0.0) {
-                /* Computing 2nd power */
                 gredsq += square(gnew[i__]);
             }
             /* L80: */
             d__[i__] += stplen * s[i__];
         }
-        /* Computing MAX */
         sdec = std::max(stplen * (ggsav - 0.5 * stplen * shs), 0.0);
         qred += sdec;
     }
@@ -364,7 +356,6 @@ L50:
         if (s[iact] < 0.0) {
             xbdi[iact] = -1.0;
         }
-        /* Computing 2nd power */
         delsq -= square(d__[iact]);
         if (delsq <= 0.0) {
             goto L90;
@@ -401,10 +392,8 @@ L100:
     gredsq = 0.0;
     for (long i__ = 1; i__ <= n; ++i__) {
         if (xbdi[i__] == 0.0) {
-            /* Computing 2nd power */
             dredsq += square(d__[i__]);
             dredg += d__[i__] * gnew[i__];
-            /* Computing 2nd power */
             gredsq += square(gnew[i__]);
             s[i__] = d__[i__];
         } else {
@@ -455,10 +444,7 @@ L120:
                 xbdi[i__] = 1.0;
                 goto L100;
             }
-            /* Computing 2nd power */
-            /* Computing 2nd power */
             ssq = square(d__[i__]) + square(s[i__]);
-            /* Computing 2nd power */
             temp = ssq - square(xopt[i__] - sl[i__]);
             if (temp > 0.0) {
                 temp = std::sqrt(temp) - s[i__];
@@ -468,7 +454,6 @@ L120:
                     xsav = -1.0;
                 }
             }
-            /* Computing 2nd power */
             temp = ssq - square(su[i__] - xopt[i__]);
             if (temp > 0.0) {
                 temp = std::sqrt(temp) + s[i__];
@@ -551,7 +536,6 @@ L150:
         if (xbdi[i__] == 0.0) {
             d__[i__] = cth * d__[i__] + sth * s[i__];
             dredg += d__[i__] * gnew[i__];
-            /* Computing 2nd power */
             gredsq += square(gnew[i__]);
         }
         /* L180: */
@@ -573,8 +557,6 @@ L150:
 L190:
     *dsq = 0.0;
     for (long i__ = 1; i__ <= n; ++i__) {
-        /* Computing MAX */
-        /* Computing MIN */
         xnew[i__] = std::max(std::min(xopt[i__] + d__[i__], su[i__]), sl[i__]);
         if (xbdi[i__] == -1.0) {
             xnew[i__] = sl[i__];
@@ -584,7 +566,6 @@ L190:
         }
         d__[i__] = xnew[i__] - xopt[i__];
         /* L200: */
-        /* Computing 2nd power */
         *dsq += square(d__[i__]);
     }
     return;
@@ -745,7 +726,6 @@ void rescue(
         for (long j = 1; j <= n; ++j) {
             xpt[k + j * xpt_dim1] -= xopt[j];
             /* L10: */
-            /* Computing 2nd power */
             distsq += square(xpt[k + j * xpt_dim1]);
         }
         sumpq += pq[k];
@@ -782,9 +762,7 @@ void rescue(
         sl[j] -= xopt[j];
         su[j] -= xopt[j];
         xopt[j] = 0.0;
-        /* Computing MIN */
         ptsaux[(j << 1) + 1] = std::min(delta, su[j]);
-        /* Computing MAX */
         ptsaux[(j << 1) + 2] = std::max(-delta, sl[j]);
         if (ptsaux[(j << 1) + 1] + ptsaux[(j << 1) + 2] < 0.0) {
             temp = ptsaux[(j << 1) + 1];
@@ -823,7 +801,6 @@ void rescue(
         } else {
             bmat[j * bmat_dim1 + 1] = -1.0 / ptsaux[(j << 1) + 1];
             bmat[jp + j * bmat_dim1] = 1.0 / ptsaux[(j << 1) + 1];
-            /* Computing 2nd power */
             bmat[j + npt + j * bmat_dim1] = -0.5 * square(ptsaux[(j << 1) + 1]);
         }
         /* L60: */
@@ -987,7 +964,6 @@ L120:
         bsum += sum * w[jp];
         vlag[jp] = sum;
         /* L230: */
-        /* Computing 2nd power */
         distsq += square(xpt[knew + j * xpt_dim1]);
     }
     beta = 0.5 * distsq * distsq + beta - bsum;
@@ -1005,10 +981,8 @@ L120:
             hdiag = 0.0;
             for (long j = 1; j <= nptm; ++j) {
                 /* L240: */
-                /* Computing 2nd power */
                 hdiag += square(zmat[k + j * zmat_dim1]);
             }
-            /* Computing 2nd power */
             den = beta * hdiag + square(vlag[k]);
             if (den > denom) {
                 kold = k;
@@ -1016,8 +990,6 @@ L120:
             }
         }
         /* L250: */
-        /* Computing MAX */
-        /* Computing 2nd power */
         vlmxsq = std::max(vlmxsq, square(vlag[k]));
     }
     if (denom <= vlmxsq * .01) {
@@ -1106,8 +1078,6 @@ L260:
         /*     is updated to provide interpolation to the new function value. */
 
         for (long i__ = 1; i__ <= n; ++i__) {
-            /* Computing MIN */
-            /* Computing MAX */
             w[i__] = std::min(std::max(xl[i__], xbase[i__] + xpt[kpt + i__ * xpt_dim1]), xu[i__]);
             if (xpt[kpt + i__ * xpt_dim1] == sl[i__]) {
                 w[i__] = xl[i__];
@@ -1148,14 +1118,11 @@ L260:
                 iq = long(double(np) * ptsid[k] - double(ip * np));
                 ihq = (iq * iq + iq) / 2;
                 if (ip == 0) {
-                    /* Computing 2nd power */
                     hq[ihq] += temp * square(ptsaux[(iq << 1) + 2]);
                 } else {
                     ihp = (ip * ip + ip) / 2;
-                    /* Computing 2nd power */
                     hq[ihp] += temp * square(ptsaux[(ip << 1) + 1]);
                     if (iq > 0) {
-                        /* Computing 2nd power */
                         hq[ihq] += temp * square(ptsaux[(iq << 1) + 1]);
                         iw = std::max(ihp, ihq) - std::abs(iq - ip);
                         hq[iw] += temp * ptsaux[(ip << 1) + 1] * ptsaux[(iq << 1) + 1];
@@ -1285,11 +1252,9 @@ L50:
             stepa = xpt[nf - n + nfx * xpt_dim1];
             stepb = -(rhobeg);
             if (sl[nfx] == 0.0) {
-                /* Computing MIN */
                 stepb = std::min(2.0 * rhobeg, su[nfx]);
             }
             if (su[nfx] == 0.0) {
-                /* Computing MAX */
                 stepb = std::max(-2.0 * rhobeg, sl[nfx]);
             }
             xpt[nf + nfx * xpt_dim1] = stepb;
@@ -1311,8 +1276,6 @@ L50:
     /*     its index are required. */
 
     for (long j = 1; j <= n; ++j) {
-        /* Computing MIN */
-        /* Computing MAX */
         x[j] = std::min(std::max(xl[j], xbase[j] + xpt[nf + j * xpt_dim1]), xu[j]);
         if (xpt[nf + j * xpt_dim1] == sl[j]) {
             x[j] = xl[j];
@@ -1537,7 +1500,6 @@ void altmov(
                     ilbd = -i__;
                 }
                 if (subd * temp > su[i__] - xopt[i__]) {
-                    /* Computing MAX */
                     subd = std::max(sumin, (su[i__] - xopt[i__]) / temp);
                     iubd = i__;
                 }
@@ -1547,7 +1509,6 @@ void altmov(
                     ilbd = i__;
                 }
                 if (subd * temp < sl[i__] - xopt[i__]) {
-                    /* Computing MAX */
                     subd = std::max(sumin, (sl[i__] - xopt[i__]) / temp);
                     iubd = -i__;
                 }
@@ -1622,8 +1583,6 @@ L80:
     for (long i__ = 1; i__ <= n; ++i__) {
         temp = xopt[i__] + stpsav * (xpt[ksav + i__ * xpt_dim1] - xopt[i__]);
         /* L90: */
-        /* Computing MAX */
-        /* Computing MIN */
         xnew[i__] = std::max(sl[i__], std::min(su[i__], temp));
     }
     if (ibdsav < 0) {
@@ -1644,13 +1603,10 @@ L100:
     ggfree = 0.0;
     for (long i__ = 1; i__ <= n; ++i__) {
         w[i__] = 0.0;
-        /* Computing MIN */
         tempa = std::min(xopt[i__] - sl[i__], glag[i__]);
-        /* Computing MAX */
         tempb = std::max(xopt[i__] - su[i__], glag[i__]);
         if (tempa > 0.0 || tempb < 0.0) {
             w[i__] = bigstp;
-            /* Computing 2nd power */
             ggfree += square(glag[i__]);
         }
         /* L110: */
@@ -1673,14 +1629,11 @@ L120:
                 temp = xopt[i__] - step * glag[i__];
                 if (temp <= sl[i__]) {
                     w[i__] = sl[i__] - xopt[i__];
-                    /* Computing 2nd power */
                     wfixsq += square(w[i__]);
                 } else if (temp >= su[i__]) {
                     w[i__] = su[i__] - xopt[i__];
-                    /* Computing 2nd power */
                     wfixsq += square(w[i__]);
                 } else {
-                    /* Computing 2nd power */
                     ggfree += square(glag[i__]);
                 }
             }
@@ -1698,8 +1651,6 @@ L120:
     for (long i__ = 1; i__ <= n; ++i__) {
         if (w[i__] == bigstp) {
             w[i__] = -step * glag[i__];
-            /* Computing MAX */
-            /* Computing MIN */
             xalt[i__] = std::max(sl[i__], std::min(su[i__], xopt[i__] + w[i__]));
         } else if (w[i__] == 0.0) {
             xalt[i__] = xopt[i__];
@@ -1735,14 +1686,10 @@ L120:
         for (long i__ = 1; i__ <= n; ++i__) {
             temp = xopt[i__] + scale * w[i__];
             /* L170: */
-            /* Computing MAX */
-            /* Computing MIN */
             xalt[i__] = std::max(sl[i__], std::min(su[i__], temp));
         }
-        /* Computing 2nd power */
         cauchy = square(0.5 * gw * scale);
     } else {
-        /* Computing 2nd power */
         cauchy = square(gw + 0.5 * curv);
     }
 
@@ -1891,7 +1838,6 @@ double bobyqb(
     for (long i__ = 1; i__ <= n; ++i__) {
         xopt[i__] = xpt[kopt + i__ * xpt_dim1];
         /* L10: */
-        /* Computing 2nd power */
         xoptsq += square(xopt[i__]);
     }
     fsave = fval[1];
@@ -1956,11 +1902,9 @@ L60:
     trsbox(n, npt, xpt + xpt_offset, xopt, gopt, hq, pq, sl,
             su, delta, xnew, d__, w, w + np - 1, w + np + n - 1,
             w + np + (n << 1) - 1, w + np + n * 3 - 1, &dsq, &crvmin);
-    /* Computing MIN */
     dnorm = std::min(delta, std::sqrt(dsq));
     if (dnorm < 0.5 * rho) {
         ntrits = -1;
-        /* Computing 2nd power */
         distsq = square(10.0 * rho);
         if (nf <= nfsav + 2) {
             goto L650;
@@ -1972,7 +1916,6 @@ L60:
         /*     the last three interpolation points compare favourably with predictions */
         /*     of likely improvements to the model within distance HALF*RHO of XOPT. */
 
-        /* Computing MAX */
         errbig = std::max(std::max(diffa, diffb), diffc);
         frhosq = rho * .125 * rho;
         if (crvmin > 0.0 && errbig > frhosq * crvmin) {
@@ -1991,7 +1934,6 @@ L60:
                 curv = hq[(j + j * j) / 2];
                 for (long k = 1; k <= npt; ++k) {
                     /* L70: */
-                    /* Computing 2nd power */
                     curv += pq[k] * square(xpt[k + j * xpt_dim1]);
                 }
                 bdtest += 0.5 * curv * rho;
@@ -2129,7 +2071,6 @@ L190:
         for (long i__ = 1; i__ <= n; ++i__) {
             xopt[i__] = xpt[kopt + i__ * xpt_dim1];
             /* L200: */
-            /* Computing 2nd power */
             xoptsq += square(xopt[i__]);
         }
     }
@@ -2205,7 +2146,6 @@ L230:
     bsum = 0.0;
     dx = 0.0;
     for (long j = 1; j <= n; ++j) {
-        /* Computing 2nd power */
         dsq += square(d__[j]);
         sum = 0.0;
         for (long k = 1; k <= npt; ++k) {
@@ -2231,7 +2171,6 @@ L230:
     /*     rounding errors have damaged the chosen denominator. */
 
     if (ntrits == 0) {
-        /* Computing 2nd power */
         denom = square(vlag[knew]) + alpha * beta;
         if (denom < cauchy && cauchy > 0.0) {
             for (long i__ = 1; i__ <= n; ++i__) {
@@ -2242,7 +2181,6 @@ L230:
             cauchy = 0.0;
             goto L230;
         }
-        /* Computing 2nd power */
         if (denom <= 0.5 * square(vlag[knew])) {
             if (nf > nresc) {
                 goto L190;
@@ -2269,27 +2207,20 @@ L230:
             hdiag = 0.0;
             for (long jj = 1; jj <= nptm; ++jj) {
                 /* L330: */
-                /* Computing 2nd power */
                 hdiag += square(zmat[k + jj * zmat_dim1]);
             }
-            /* Computing 2nd power */
             den = beta * hdiag + square(vlag[k]);
             distsq = 0.0;
             for (long j = 1; j <= n; ++j) {
                 /* L340: */
-                /* Computing 2nd power */
                 distsq += square(xpt[k + j * xpt_dim1] - xopt[j]);
             }
-            /* Computing MAX */
-            /* Computing 2nd power */
             temp = std::max(1.0, square(distsq / delsq));
             if (temp * den > scaden) {
                 scaden = temp * den;
                 knew = k;
                 denom = den;
             }
-            /* Computing MAX */
-            /* Computing 2nd power */
             biglsq = std::max(biglsq, temp * square(vlag[k]));
 L350:
             ;
@@ -2312,8 +2243,6 @@ L350:
 
 L360:
     for (long i__ = 1; i__ <= n; ++i__) {
-        /* Computing MIN */
-        /* Computing MAX */
         x[i__] = std::min(std::max(xl[i__], xbase[i__] + xnew[i__]), xu[i__]);
         if (xnew[i__] == sl[i__]) {
             x[i__] = xl[i__];
@@ -2355,7 +2284,6 @@ L360:
     }
     for (long k = 1; k <= npt; ++k) {
         /* L420: */
-        /* Computing 2nd power */
         vquad += 0.5 * pq[k] * square(w[npt + k]);
     }
     diff = f - fopt - vquad;
@@ -2375,13 +2303,10 @@ L360:
         }
         ratio = (f - fopt) / vquad;
         if (ratio <= 0.1) {
-            /* Computing MIN */
             delta = std::min(0.5 * delta, dnorm);
         } else if (ratio <= .7) {
-            /* Computing MAX */
             delta = std::max(0.5 * delta, dnorm);
         } else {
-            /* Computing MAX */
             delta = std::max(0.5 * delta, dnorm + dnorm);
         }
         if (delta <= rho * 1.5) {
@@ -2401,19 +2326,14 @@ L360:
                 hdiag = 0.0;
                 for (long jj = 1; jj <= nptm; ++jj) {
                     /* L440: */
-                    /* Computing 2nd power */
                     hdiag += square(zmat[k + jj * zmat_dim1]);
                 }
-                /* Computing 2nd power */
                 den = beta * hdiag + square(vlag[k]);
                 distsq = 0.0;
                 for (long j = 1; j <= n; ++j) {
                     /* L450: */
-                    /* Computing 2nd power */
                     distsq += square(xpt[k + j * xpt_dim1] - xnew[j]);
                 }
-                /* Computing MAX */
-                /* Computing 2nd power */
                 temp = std::max(1.0, square(distsq / delsq));
                 if (temp * den > scaden) {
                     scaden = temp * den;
@@ -2421,8 +2341,6 @@ L360:
                     denom = den;
                 }
                 /* L460: */
-                /* Computing MAX */
-                /* Computing 2nd power */
                 biglsq = std::max(biglsq, temp * square(vlag[k]));
             }
             if (scaden <= 0.5 * biglsq) {
@@ -2495,7 +2413,6 @@ L360:
         ih = 0;
         for (long j = 1; j <= n; ++j) {
             xopt[j] = xnew[j];
-            /* Computing 2nd power */
             xoptsq += square(xopt[j]);
             for (long i__ = 1; i__ <= j; ++i__) {
                 ++ih;
@@ -2561,20 +2478,12 @@ L360:
                     * xpt_dim1] * w[k];
             }
             if (xopt[i__] == sl[i__]) {
-                /* Computing MIN */
-                /* Computing 2nd power */
-                /* Computing 2nd power */
                 gqsq += square(std::min(0.0, gopt[i__]));
-                /* Computing 2nd power */
                 gisq += square(std::min(0.0, sum));
             } else if (xopt[i__] == su[i__]) {
-                /* Computing MAX */
-                /* Computing 2nd power */
                 gqsq += square(std::max(0.0, gopt[i__]));
-                /* Computing 2nd power */
                 gisq += square(std::max(0.0, sum));
             } else {
-                /* Computing 2nd power */
                 gqsq += square(gopt[i__]);
                 gisq += sum * sum;
             }
@@ -2621,9 +2530,6 @@ L360:
     /*     Alternatively, find out if the interpolation points are close enough */
     /*       to the best point so far. */
 
-    /* Computing MAX */
-    /* Computing 2nd power */
-    /* Computing 2nd power */
     distsq = std::max(square(2.0 * delta), square(10.0 * rho));
 L650:
     knew = 0;
@@ -2631,7 +2537,6 @@ L650:
         sum = 0.0;
         for (long j = 1; j <= n; ++j) {
             /* L660: */
-            /* Computing 2nd power */
             sum += square(xpt[k + j * xpt_dim1] - xopt[j]);
         }
         if (sum > distsq) {
@@ -2650,15 +2555,12 @@ L650:
     if (knew > 0) {
         dist = std::sqrt(distsq);
         if (ntrits == -1) {
-            /* Computing MIN */
             delta = std::min(0.1 * delta, 0.5 * dist);
             if (delta <= rho * 1.5) {
                 delta = rho;
             }
         }
         ntrits = 0;
-        /* Computing MAX */
-        /* Computing MIN */
         adelt = std::max(std::min(0.1 * dist, delta), rho);
         dsq = adelt * adelt;
         goto L90;
@@ -2702,8 +2604,6 @@ L680:
 L720:
     if (fval[kopt] <= fsave) {
         for (long i__ = 1; i__ <= n; ++i__) {
-            /* Computing MIN */
-            /* Computing MAX */
             x[i__] = std::min(std::max(xl[i__], xbase[i__] + xopt[i__]), xu[i__]);
             if (xopt[i__] == sl[i__]) {
                 x[i__] = xl[i__];
@@ -2816,7 +2716,6 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
             } else {
                 x[j] = xl[j] + rhobeg;
                 w[jsl] = -(rhobeg);
-                /* Computing MAX */
                 w[jsu] = std::max(xu[j] - x[j], rhobeg);
             }
         } else if (w[jsu] <= rhobeg) {
@@ -2826,7 +2725,6 @@ double bobyqa_impl(const Function &function, long n, long npt, double *x,
                 w[jsu] = 0.0;
             } else {
                 x[j] = xu[j] - rhobeg;
-                /* Computing MIN */
                 w[jsl] = std::min(xl[j] - x[j], -rhobeg);
                 w[jsu] = rhobeg;
             }
