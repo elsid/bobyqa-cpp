@@ -15,13 +15,19 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 include_directories(include)
-add_library(bobyqa_static STATIC src/bobyqa.cpp include/bobyqa.h)
+set(SOURCES
+    src/altmov.cpp
+    src/bobyqa.cpp
+    src/trsbox.cpp
+    src/update.cpp
+)
+add_library(bobyqa_static STATIC ${SOURCES})
 set_target_properties(bobyqa_static PROPERTIES OUTPUT_NAME bobyqa)
-add_library(bobyqa_shared SHARED src/bobyqa.cpp include/bobyqa.h)
+add_library(bobyqa_shared SHARED ${SOURCES})
 set_target_properties(bobyqa_shared PROPERTIES OUTPUT_NAME bobyqa)
-add_executable(example_function src/example_function.c include/bobyqa.h)
+add_executable(example_function src/example_function.c)
 target_link_libraries(example_function bobyqa_static)
-add_executable(example_closure src/example_closure.cpp include/bobyqa.h)
+add_executable(example_closure src/example_closure.cpp)
 target_link_libraries(example_closure bobyqa_static)
 enable_testing()
 add_executable(test_bobyqa tests/bobyqa.cpp)
