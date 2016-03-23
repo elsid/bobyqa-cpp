@@ -16,7 +16,7 @@ void trsbox(
     const double *const su,
     const double delta,
     double *const xnew,
-    double *const d__,
+    double *const d,
     double *const gnew,
     double *const xbdi,
     double *const s,
@@ -98,22 +98,22 @@ void trsbox(
 
     iterc = 0;
     nact = 0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        xbdi[i__] = 0.0;
-        if (xopt[i__] <= sl[i__]) {
-            if (gopt[i__] >= 0.0) {
-                xbdi[i__] = -1.0;
+    for (long i = 1; i <= n; ++i) {
+        xbdi[i] = 0.0;
+        if (xopt[i] <= sl[i]) {
+            if (gopt[i] >= 0.0) {
+                xbdi[i] = -1.0;
             }
-        } else if (xopt[i__] >= su[i__]) {
-            if (gopt[i__] <= 0.0) {
-                xbdi[i__] = 1.0;
+        } else if (xopt[i] >= su[i]) {
+            if (gopt[i] <= 0.0) {
+                xbdi[i] = 1.0;
             }
         }
-        if (xbdi[i__] != 0.0) {
+        if (xbdi[i] != 0.0) {
             ++nact;
         }
-        d__[i__] = 0.0;
-        gnew[i__] = gopt[i__];
+        d[i] = 0.0;
+        gnew[i] = gopt[i];
     }
     delsq = delta * delta;
     qred = 0.0;
@@ -129,15 +129,15 @@ L20:
     beta = 0.0;
 L30:
     stepsq = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        if (xbdi[i__] != 0.0) {
-            s[i__] = 0.0;
+    for (long i = 1; i <= n; ++i) {
+        if (xbdi[i] != 0.0) {
+            s[i] = 0.0;
         } else if (beta == 0.0) {
-            s[i__] = -gnew[i__];
+            s[i] = -gnew[i];
         } else {
-            s[i__] = beta * s[i__] - gnew[i__];
+            s[i] = beta * s[i] - gnew[i];
         }
-        stepsq += square(s[i__]);
+        stepsq += square(s[i]);
     }
     if (stepsq == 0.0) {
         goto L190;
@@ -160,11 +160,11 @@ L50:
     resid = delsq;
     ds = 0.0;
     shs = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        if (xbdi[i__] == 0.0) {
-            resid -= square(d__[i__]);
-            ds += s[i__] * d__[i__];
-            shs += s[i__] * hs[i__];
+    for (long i = 1; i <= n; ++i) {
+        if (xbdi[i] == 0.0) {
+            resid -= square(d[i]);
+            ds += s[i] * d[i];
+            shs += s[i] * hs[i];
         }
     }
     if (resid <= 0.0) {
@@ -185,17 +185,17 @@ L50:
     /*     letting IACT be the index of the new constrained variable. */
 
     iact = 0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        if (s[i__] != 0.0) {
-            xsum = xopt[i__] + d__[i__];
-            if (s[i__] > 0.0) {
-                temp = (su[i__] - xsum) / s[i__];
+    for (long i = 1; i <= n; ++i) {
+        if (s[i] != 0.0) {
+            xsum = xopt[i] + d[i];
+            if (s[i] > 0.0) {
+                temp = (su[i] - xsum) / s[i];
             } else {
-                temp = (sl[i__] - xsum) / s[i__];
+                temp = (sl[i] - xsum) / s[i];
             }
             if (temp < stplen) {
                 stplen = temp;
-                iact = i__;
+                iact = i;
             }
         }
     }
@@ -214,12 +214,12 @@ L50:
         }
         ggsav = gredsq;
         gredsq = 0.0;
-        for (long i__ = 1; i__ <= n; ++i__) {
-            gnew[i__] += stplen * hs[i__];
-            if (xbdi[i__] == 0.0) {
-                gredsq += square(gnew[i__]);
+        for (long i = 1; i <= n; ++i) {
+            gnew[i] += stplen * hs[i];
+            if (xbdi[i] == 0.0) {
+                gredsq += square(gnew[i]);
             }
-            d__[i__] += stplen * s[i__];
+            d[i] += stplen * s[i];
         }
         sdec = std::max(stplen * (ggsav - 0.5 * stplen * shs), 0.0);
         qred += sdec;
@@ -233,7 +233,7 @@ L50:
         if (s[iact] < 0.0) {
             xbdi[iact] = -1.0;
         }
-        delsq -= square(d__[iact]);
+        delsq -= square(d[iact]);
         if (delsq <= 0.0) {
             goto L90;
         }
@@ -267,14 +267,14 @@ L100:
     dredsq = 0.0;
     dredg = 0.0;
     gredsq = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        if (xbdi[i__] == 0.0) {
-            dredsq += square(d__[i__]);
-            dredg += d__[i__] * gnew[i__];
-            gredsq += square(gnew[i__]);
-            s[i__] = d__[i__];
+    for (long i = 1; i <= n; ++i) {
+        if (xbdi[i] == 0.0) {
+            dredsq += square(d[i]);
+            dredg += d[i] * gnew[i];
+            gredsq += square(gnew[i]);
+            s[i] = d[i];
         } else {
-            s[i__] = 0.0;
+            s[i] = 0.0;
         }
     }
     itcsav = iterc;
@@ -290,11 +290,11 @@ L120:
         goto L190;
     }
     temp = std::sqrt(temp);
-    for (long i__ = 1; i__ <= n; ++i__) {
-        if (xbdi[i__] == 0.0) {
-            s[i__] = (dredg * d__[i__] - dredsq * gnew[i__]) / temp;
+    for (long i = 1; i <= n; ++i) {
+        if (xbdi[i] == 0.0) {
+            s[i] = (dredg * d[i] - dredsq * gnew[i]) / temp;
         } else {
-            s[i__] = 0.0;
+            s[i] = 0.0;
         }
     }
     sredg = -temp;
@@ -306,35 +306,35 @@ L120:
 
     angbd = 1.0;
     iact = 0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        if (xbdi[i__] == 0.0) {
-            tempa = xopt[i__] + d__[i__] - sl[i__];
-            tempb = su[i__] - xopt[i__] - d__[i__];
+    for (long i = 1; i <= n; ++i) {
+        if (xbdi[i] == 0.0) {
+            tempa = xopt[i] + d[i] - sl[i];
+            tempb = su[i] - xopt[i] - d[i];
             if (tempa <= 0.0) {
                 ++nact;
-                xbdi[i__] = -1.0;
+                xbdi[i] = -1.0;
                 goto L100;
             } else if (tempb <= 0.0) {
                 ++nact;
-                xbdi[i__] = 1.0;
+                xbdi[i] = 1.0;
                 goto L100;
             }
-            ssq = square(d__[i__]) + square(s[i__]);
-            temp = ssq - square(xopt[i__] - sl[i__]);
+            ssq = square(d[i]) + square(s[i]);
+            temp = ssq - square(xopt[i] - sl[i]);
             if (temp > 0.0) {
-                temp = std::sqrt(temp) - s[i__];
+                temp = std::sqrt(temp) - s[i];
                 if (angbd * temp > tempa) {
                     angbd = tempa / temp;
-                    iact = i__;
+                    iact = i;
                     xsav = -1.0;
                 }
             }
-            temp = ssq - square(su[i__] - xopt[i__]);
+            temp = ssq - square(su[i] - xopt[i]);
             if (temp > 0.0) {
-                temp = std::sqrt(temp) + s[i__];
+                temp = std::sqrt(temp) + s[i];
                 if (angbd * temp > tempb) {
                     angbd = tempb / temp;
-                    iact = i__;
+                    iact = i;
                     xsav = 1.0;
                 }
             }
@@ -348,11 +348,11 @@ L150:
     shs = 0.0;
     dhs = 0.0;
     dhd = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        if (xbdi[i__] == 0.0) {
-            shs += s[i__] * hs[i__];
-            dhs += d__[i__] * hs[i__];
-            dhd += d__[i__] * hred[i__];
+    for (long i = 1; i <= n; ++i) {
+        if (xbdi[i] == 0.0) {
+            shs += s[i] * hs[i];
+            dhs += d[i] * hs[i];
+            dhd += d[i] * hred[i];
         }
     }
 
@@ -364,16 +364,16 @@ L150:
     isav = 0;
     redsav = 0.0;
     iu = long(angbd * 17. + 3.1);
-    for (long i__ = 1; i__ <= iu; ++i__) {
-        angt = angbd * double(i__) / double(iu);
+    for (long i = 1; i <= iu; ++i) {
+        angt = angbd * double(i) / double(iu);
         sth = (angt + angt) / (1.0 + angt * angt);
         temp = shs + angt * (angt * dhd - dhs - dhs);
         rednew = sth * (angt * dredg - sredg - 0.5 * sth * temp);
         if (rednew > redmax) {
             redmax = rednew;
-            isav = i__;
+            isav = i;
             rdprev = redsav;
-        } else if (i__ == isav + 1) {
+        } else if (i == isav + 1) {
             rdnext = rednew;
         }
         redsav = rednew;
@@ -403,14 +403,14 @@ L150:
 
     dredg = 0.0;
     gredsq = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        gnew[i__] = gnew[i__] + (cth - 1.0) * hred[i__] + sth * hs[i__];
-        if (xbdi[i__] == 0.0) {
-            d__[i__] = cth * d__[i__] + sth * s[i__];
-            dredg += d__[i__] * gnew[i__];
-            gredsq += square(gnew[i__]);
+    for (long i = 1; i <= n; ++i) {
+        gnew[i] = gnew[i] + (cth - 1.0) * hred[i] + sth * hs[i];
+        if (xbdi[i] == 0.0) {
+            d[i] = cth * d[i] + sth * s[i];
+            dredg += d[i] * gnew[i];
+            gredsq += square(gnew[i]);
         }
-        hred[i__] = cth * hred[i__] + sth * hs[i__];
+        hred[i] = cth * hred[i] + sth * hs[i];
     }
     qred += sdec;
     if (iact > 0 && isav == iu) {
@@ -427,16 +427,16 @@ L150:
     }
 L190:
     *dsq = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        xnew[i__] = std::max(std::min(xopt[i__] + d__[i__], su[i__]), sl[i__]);
-        if (xbdi[i__] == -1.0) {
-            xnew[i__] = sl[i__];
+    for (long i = 1; i <= n; ++i) {
+        xnew[i] = std::max(std::min(xopt[i] + d[i], su[i]), sl[i]);
+        if (xbdi[i] == -1.0) {
+            xnew[i] = sl[i];
         }
-        if (xbdi[i__] == 1.0) {
-            xnew[i__] = su[i__];
+        if (xbdi[i] == 1.0) {
+            xnew[i] = su[i];
         }
-        d__[i__] = xnew[i__] - xopt[i__];
-        *dsq += square(d__[i__]);
+        d[i] = xnew[i] - xopt[i];
+        *dsq += square(d[i]);
     }
     return;
     /*     The following instructions multiply the current S-vector by the second */
@@ -448,12 +448,12 @@ L210:
     long ih = 0;
     for (long j = 1; j <= n; ++j) {
         hs[j] = 0.0;
-        for (long i__ = 1; i__ <= j; ++i__) {
+        for (long i = 1; i <= j; ++i) {
             ++ih;
-            if (i__ < j) {
-                hs[j] += hq[ih] * s[i__];
+            if (i < j) {
+                hs[j] += hq[ih] * s[i];
             }
-            hs[i__] += hq[ih] * s[j];
+            hs[i] += hq[ih] * s[j];
         }
     }
     for (long k = 1; k <= npt; ++k) {
@@ -463,8 +463,8 @@ L210:
                 temp += xpt[k + j * xpt_dim1] * s[j];
             }
             temp *= pq[k];
-            for (long i__ = 1; i__ <= n; ++i__) {
-                hs[i__] += temp * xpt[k + i__ * xpt_dim1];
+            for (long i = 1; i <= n; ++i) {
+                hs[i] += temp * xpt[k + i * xpt_dim1];
             }
         }
     }
@@ -474,8 +474,8 @@ L210:
     if (iterc > itcsav) {
         goto L150;
     }
-    for (long i__ = 1; i__ <= n; ++i__) {
-        hred[i__] = hs[i__];
+    for (long i = 1; i <= n; ++i) {
+        hred[i] = hs[i];
     }
     goto L120;
 }

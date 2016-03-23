@@ -98,8 +98,8 @@ void altmov(
 
     /*     Calculate the gradient of the KNEW-th Lagrange function at XOPT. */
 
-    for (long i__ = 1; i__ <= n; ++i__) {
-        glag[i__] = bmat[knew + i__ * bmat_dim1];
+    for (long i = 1; i <= n; ++i) {
+        glag[i] = bmat[knew + i * bmat_dim1];
     }
     for (long k = 1; k <= npt; ++k) {
         temp = 0.0;
@@ -107,8 +107,8 @@ void altmov(
             temp += xpt[k + j * xpt_dim1] * xopt[j];
         }
         temp = hcol[k] * temp;
-        for (long i__ = 1; i__ <= n; ++i__) {
-            glag[i__] += temp * xpt[k + i__ * xpt_dim1];
+        for (long i = 1; i <= n; ++i) {
+            glag[i] += temp * xpt[k + i * xpt_dim1];
         }
     }
 
@@ -125,9 +125,9 @@ void altmov(
         }
         dderiv = 0.0;
         distsq = 0.0;
-        for (long i__ = 1; i__ <= n; ++i__) {
-            temp = xpt[k + i__ * xpt_dim1] - xopt[i__];
-            dderiv += glag[i__] * temp;
+        for (long i = 1; i <= n; ++i) {
+            temp = xpt[k + i * xpt_dim1] - xopt[i];
+            dderiv += glag[i] * temp;
             distsq += temp * temp;
         }
         subd = adelt / std::sqrt(distsq);
@@ -138,25 +138,25 @@ void altmov(
 
         /*     Revise SLBD and SUBD if necessary because of the bounds in SL and SU. */
 
-        for (long i__ = 1; i__ <= n; ++i__) {
-            temp = xpt[k + i__ * xpt_dim1] - xopt[i__];
+        for (long i = 1; i <= n; ++i) {
+            temp = xpt[k + i * xpt_dim1] - xopt[i];
             if (temp > 0.0) {
-                if (slbd * temp < sl[i__] - xopt[i__]) {
-                    slbd = (sl[i__] - xopt[i__]) / temp;
-                    ilbd = -i__;
+                if (slbd * temp < sl[i] - xopt[i]) {
+                    slbd = (sl[i] - xopt[i]) / temp;
+                    ilbd = -i;
                 }
-                if (subd * temp > su[i__] - xopt[i__]) {
-                    subd = std::max(sumin, (su[i__] - xopt[i__]) / temp);
-                    iubd = i__;
+                if (subd * temp > su[i] - xopt[i]) {
+                    subd = std::max(sumin, (su[i] - xopt[i]) / temp);
+                    iubd = i;
                 }
             } else if (temp < 0.0) {
-                if (slbd * temp > su[i__] - xopt[i__]) {
-                    slbd = (su[i__] - xopt[i__]) / temp;
-                    ilbd = i__;
+                if (slbd * temp > su[i] - xopt[i]) {
+                    slbd = (su[i] - xopt[i]) / temp;
+                    ilbd = i;
                 }
-                if (subd * temp < sl[i__] - xopt[i__]) {
-                    subd = std::max(sumin, (sl[i__] - xopt[i__]) / temp);
-                    iubd = -i__;
+                if (subd * temp < sl[i] - xopt[i]) {
+                    subd = std::max(sumin, (sl[i] - xopt[i]) / temp);
+                    iubd = -i;
                 }
             }
         }
@@ -225,9 +225,9 @@ L80:
 
     /*     Construct XNEW in a way that satisfies the bound constraints exactly. */
 
-    for (long i__ = 1; i__ <= n; ++i__) {
-        temp = xopt[i__] + stpsav * (xpt[ksav + i__ * xpt_dim1] - xopt[i__]);
-        xnew[i__] = std::max(sl[i__], std::min(su[i__], temp));
+    for (long i = 1; i <= n; ++i) {
+        temp = xopt[i] + stpsav * (xpt[ksav + i * xpt_dim1] - xopt[i]);
+        xnew[i] = std::max(sl[i], std::min(su[i], temp));
     }
     if (ibdsav < 0) {
         xnew[-ibdsav] = sl[-ibdsav];
@@ -245,13 +245,13 @@ L80:
 L100:
     wfixsq = 0.0;
     ggfree = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        w[i__] = 0.0;
-        tempa = std::min(xopt[i__] - sl[i__], glag[i__]);
-        tempb = std::max(xopt[i__] - su[i__], glag[i__]);
+    for (long i = 1; i <= n; ++i) {
+        w[i] = 0.0;
+        tempa = std::min(xopt[i] - sl[i], glag[i]);
+        tempb = std::max(xopt[i] - su[i], glag[i]);
         if (tempa > 0.0 || tempb < 0.0) {
-            w[i__] = bigstp;
-            ggfree += square(glag[i__]);
+            w[i] = bigstp;
+            ggfree += square(glag[i]);
         }
     }
     if (ggfree == 0.0) {
@@ -267,17 +267,17 @@ L120:
         wsqsav = wfixsq;
         step = std::sqrt(temp / ggfree);
         ggfree = 0.0;
-        for (long i__ = 1; i__ <= n; ++i__) {
-            if (w[i__] == bigstp) {
-                temp = xopt[i__] - step * glag[i__];
-                if (temp <= sl[i__]) {
-                    w[i__] = sl[i__] - xopt[i__];
-                    wfixsq += square(w[i__]);
-                } else if (temp >= su[i__]) {
-                    w[i__] = su[i__] - xopt[i__];
-                    wfixsq += square(w[i__]);
+        for (long i = 1; i <= n; ++i) {
+            if (w[i] == bigstp) {
+                temp = xopt[i] - step * glag[i];
+                if (temp <= sl[i]) {
+                    w[i] = sl[i] - xopt[i];
+                    wfixsq += square(w[i]);
+                } else if (temp >= su[i]) {
+                    w[i] = su[i] - xopt[i];
+                    wfixsq += square(w[i]);
                 } else {
-                    ggfree += square(glag[i__]);
+                    ggfree += square(glag[i]);
                 }
             }
         }
@@ -290,18 +290,18 @@ L120:
     /*     except that W may be scaled later. */
 
     gw = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        if (w[i__] == bigstp) {
-            w[i__] = -step * glag[i__];
-            xalt[i__] = std::max(sl[i__], std::min(su[i__], xopt[i__] + w[i__]));
-        } else if (w[i__] == 0.0) {
-            xalt[i__] = xopt[i__];
-        } else if (glag[i__] > 0.0) {
-            xalt[i__] = sl[i__];
+    for (long i = 1; i <= n; ++i) {
+        if (w[i] == bigstp) {
+            w[i] = -step * glag[i];
+            xalt[i] = std::max(sl[i], std::min(su[i], xopt[i] + w[i]));
+        } else if (w[i] == 0.0) {
+            xalt[i] = xopt[i];
+        } else if (glag[i] > 0.0) {
+            xalt[i] = sl[i];
         } else {
-            xalt[i__] = su[i__];
+            xalt[i] = su[i];
         }
-        gw += glag[i__] * w[i__];
+        gw += glag[i] * w[i];
     }
 
     /*     Set CURV to the curvature of the KNEW-th Lagrange function along W. */
@@ -322,9 +322,9 @@ L120:
     }
     if (curv > -gw && curv < -one_plus_sqrt_2 * gw) {
         scale = -gw / curv;
-        for (long i__ = 1; i__ <= n; ++i__) {
-            temp = xopt[i__] + scale * w[i__];
-            xalt[i__] = std::max(sl[i__], std::min(su[i__], temp));
+        for (long i = 1; i <= n; ++i) {
+            temp = xopt[i] + scale * w[i];
+            xalt[i] = std::max(sl[i], std::min(su[i], temp));
         }
         cauchy = square(0.5 * gw * scale);
     } else {
@@ -336,17 +336,17 @@ L120:
     /*     is chosen is the one that gives the larger value of CAUCHY. */
 
     if (iflag == 0) {
-        for (long i__ = 1; i__ <= n; ++i__) {
-            glag[i__] = -glag[i__];
-            w[n + i__] = xalt[i__];
+        for (long i = 1; i <= n; ++i) {
+            glag[i] = -glag[i];
+            w[n + i] = xalt[i];
         }
         csave = cauchy;
         iflag = 1;
         goto L100;
     }
     if (csave > cauchy) {
-        for (long i__ = 1; i__ <= n; ++i__) {
-            xalt[i__] = w[n + i__];
+        for (long i = 1; i <= n; ++i) {
+            xalt[i] = w[n + i];
         }
         cauchy = csave;
     }

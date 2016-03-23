@@ -51,10 +51,10 @@ void update(
             const double temp = std::hypot(zmat[knew + zmat_dim1], zmat[knew + j * zmat_dim1]);
             const double tempa = zmat[knew + zmat_dim1] / temp;
             const double tempb = zmat[knew + j * zmat_dim1] / temp;
-            for (long i__ = 1; i__ <= npt; ++i__) {
-                const double temp = tempa * zmat[i__ + zmat_dim1] + tempb * zmat[i__ + j * zmat_dim1];
-                zmat[i__ + j * zmat_dim1] = tempa * zmat[i__ + j * zmat_dim1] - tempb * zmat[i__ + zmat_dim1];
-                zmat[i__ + zmat_dim1] = temp;
+            for (long i = 1; i <= npt; ++i) {
+                const double temp = tempa * zmat[i + zmat_dim1] + tempb * zmat[i + j * zmat_dim1];
+                zmat[i + j * zmat_dim1] = tempa * zmat[i + j * zmat_dim1] - tempb * zmat[i + zmat_dim1];
+                zmat[i + zmat_dim1] = temp;
             }
         }
         zmat[knew + j * zmat_dim1] = 0.0;
@@ -63,8 +63,8 @@ void update(
     /*     Put the first NPT components of the KNEW-th column of HLAG into W, */
     /*     and calculate the parameters of the updating formula. */
 
-    for (long i__ = 1; i__ <= npt; ++i__) {
-        w[i__] = zmat[knew + zmat_dim1] * zmat[i__ + zmat_dim1];
+    for (long i = 1; i <= npt; ++i) {
+        w[i] = zmat[knew + zmat_dim1] * zmat[i + zmat_dim1];
     }
     const double alpha = w[knew];
     const double tau = vlag[knew];
@@ -74,8 +74,8 @@ void update(
     const double temp = std::sqrt(denom);
     const double tempb = zmat[knew + zmat_dim1] / temp;
     const double tempa = tau / temp;
-    for (long i__ = 1; i__ <= npt; ++i__) {
-        zmat[i__ + zmat_dim1] = tempa * zmat[i__ + zmat_dim1] - tempb * vlag[i__];
+    for (long i = 1; i <= npt; ++i) {
+        zmat[i + zmat_dim1] = tempa * zmat[i + zmat_dim1] - tempb * vlag[i];
     }
 
     /*     Finally, update the matrix BMAT. */
@@ -85,10 +85,10 @@ void update(
         w[jp] = bmat[knew + j * bmat_dim1];
         const double tempa = (alpha * vlag[jp] - tau * w[jp]) / denom;
         const double tempb = (-(beta) * w[jp] - tau * vlag[jp]) / denom;
-        for (long i__ = 1; i__ <= jp; ++i__) {
-            bmat[i__ + j * bmat_dim1] = bmat[i__ + j * bmat_dim1] + tempa * vlag[i__] + tempb * w[i__];
-            if (i__ > npt) {
-                bmat[jp + (i__ - npt) * bmat_dim1] = bmat[i__ + j * bmat_dim1];
+        for (long i = 1; i <= jp; ++i) {
+            bmat[i + j * bmat_dim1] = bmat[i + j * bmat_dim1] + tempa * vlag[i] + tempb * w[i];
+            if (i > npt) {
+                bmat[jp + (i - npt) * bmat_dim1] = bmat[i + j * bmat_dim1];
             }
         }
     }

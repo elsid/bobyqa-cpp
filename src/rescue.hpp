@@ -134,9 +134,9 @@ void rescue(
         for (long k = 1; k <= npt; ++k) {
             w[j] += pq[k] * xpt[k + j * xpt_dim1];
         }
-        for (long i__ = 1; i__ <= j; ++i__) {
+        for (long i = 1; i <= j; ++i) {
             ++ih;
-            hq[ih] = hq[ih] + w[i__] * xopt[j] + w[j] * xopt[i__];
+            hq[ih] = hq[ih] + w[i] * xopt[j] + w[j] * xopt[i];
         }
     }
 
@@ -158,8 +158,8 @@ void rescue(
         if (std::abs(ptsaux[(j << 1) + 2]) < 0.5 * std::abs(ptsaux[(j << 1) + 1])) {
             ptsaux[(j << 1) + 2] = 0.5 * ptsaux[(j << 1) + 1];
         }
-        for (long i__ = 1; i__ <= ndim; ++i__) {
-            bmat[i__ + j * bmat_dim1] = 0.0;
+        for (long i = 1; i <= ndim; ++i) {
+            bmat[i + j * bmat_dim1] = 0.0;
         }
     }
     fbase = fval[kopt];
@@ -385,9 +385,9 @@ L260:
             w[j] = xpt[kpt + j * xpt_dim1];
             xpt[kpt + j * xpt_dim1] = 0.0;
             temp = pq[kpt] * w[j];
-            for (long i__ = 1; i__ <= j; ++i__) {
+            for (long i = 1; i <= j; ++i) {
                 ++ih;
-                hq[ih] += temp * w[i__];
+                hq[ih] += temp * w[i];
             }
         }
         pq[kpt] = 0.0;
@@ -440,13 +440,13 @@ L260:
         /*     that is going to multiply the KPT-th Lagrange function when the model */
         /*     is updated to provide interpolation to the new function value. */
 
-        for (long i__ = 1; i__ <= n; ++i__) {
-            w[i__] = std::min(std::max(xl[i__], xbase[i__] + xpt[kpt + i__ * xpt_dim1]), xu[i__]);
-            if (xpt[kpt + i__ * xpt_dim1] == sl[i__]) {
-                w[i__] = xl[i__];
+        for (long i = 1; i <= n; ++i) {
+            w[i] = std::min(std::max(xl[i], xbase[i] + xpt[kpt + i * xpt_dim1]), xu[i]);
+            if (xpt[kpt + i * xpt_dim1] == sl[i]) {
+                w[i] = xl[i];
             }
-            if (xpt[kpt + i__ * xpt_dim1] == su[i__]) {
-                w[i__] = xu[i__];
+            if (xpt[kpt + i * xpt_dim1] == su[i]) {
+                w[i] = xu[i];
             }
         }
         ++(nf);
@@ -462,8 +462,8 @@ L260:
         /*     Update the quadratic model. The RETURN from the subroutine occurs when */
         /*     all the new interpolation points are included in the model. */
 
-        for (long i__ = 1; i__ <= n; ++i__) {
-            gopt[i__] += diff * bmat[kpt + i__ * bmat_dim1];
+        for (long i = 1; i <= n; ++i) {
+            gopt[i] += diff * bmat[kpt + i * bmat_dim1];
         }
         for (long k = 1; k <= npt; ++k) {
             sum = 0.0;

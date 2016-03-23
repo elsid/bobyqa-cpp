@@ -14,7 +14,7 @@ void trsbox(
     const double *const su,
     const double delta,
     double *const xnew,
-    double *const d__,
+    double *const d,
     double *const gnew,
     double *const xbdi,
     double *const s,

@@ -32,7 +32,7 @@ double bobyqb(
     double *const su,
     double *const xnew,
     double *const xalt,
-    double *const d__,
+    double *const d,
     double *const vlag,
     double *const w
 )
@@ -124,9 +124,9 @@ double bobyqb(
             xpt + xpt_offset, fval, gopt, hq, pq, bmat + bmat_offset,
             zmat + zmat_offset, ndim, sl, su, nf, kopt);
     xoptsq = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        xopt[i__] = xpt[kopt + i__ * xpt_dim1];
-        xoptsq += square(xopt[i__]);
+    for (long i = 1; i <= n; ++i) {
+        xopt[i] = xpt[kopt + i * xpt_dim1];
+        xoptsq += square(xopt[i]);
     }
     fsave = fval[1];
     if (nf < npt) {
@@ -154,12 +154,12 @@ L20:
     if (kopt != kbase) {
         ih = 0;
         for (long j = 1; j <= n; ++j) {
-            for (long i__ = 1; i__ <= j; ++i__) {
+            for (long i = 1; i <= j; ++i) {
                 ++ih;
-                if (i__ < j) {
-                    gopt[j] += hq[ih] * xopt[i__];
+                if (i < j) {
+                    gopt[j] += hq[ih] * xopt[i];
                 }
-                gopt[i__] += hq[ih] * xopt[j];
+                gopt[i] += hq[ih] * xopt[j];
             }
         }
         if (nf > npt) {
@@ -169,8 +169,8 @@ L20:
                     temp += xpt[k + j * xpt_dim1] * xopt[j];
                 }
                 temp = pq[k] * temp;
-                for (long i__ = 1; i__ <= n; ++i__) {
-                    gopt[i__] += temp * xpt[k + i__ * xpt_dim1];
+                for (long i = 1; i <= n; ++i) {
+                    gopt[i] += temp * xpt[k + i * xpt_dim1];
                 }
             }
         }
@@ -185,7 +185,7 @@ L20:
 
 L60:
     trsbox(n, npt, xpt + xpt_offset, xopt, gopt, hq, pq, sl,
-            su, delta, xnew, d__, w, w + np - 1, w + np + n - 1,
+            su, delta, xnew, d, w, w + np - 1, w + np + n - 1,
             w + np + (n << 1) - 1, w + np + n * 3 - 1, &dsq, &crvmin);
     dnorm = std::min(delta, std::sqrt(dsq));
     if (dnorm < 0.5 * rho) {
@@ -243,17 +243,17 @@ L90:
         for (long k = 1; k <= npt; ++k) {
             sumpq += pq[k];
             sum = -0.5 * xoptsq;
-            for (long i__ = 1; i__ <= n; ++i__) {
-                sum += xpt[k + i__ * xpt_dim1] * xopt[i__];
+            for (long i = 1; i <= n; ++i) {
+                sum += xpt[k + i * xpt_dim1] * xopt[i];
             }
             w[npt + k] = sum;
             temp = fracsq - 0.5 * sum;
-            for (long i__ = 1; i__ <= n; ++i__) {
-                w[i__] = bmat[k + i__ * bmat_dim1];
-                vlag[i__] = sum * xpt[k + i__ * xpt_dim1] + temp * xopt[i__];
-                const long ip = npt + i__;
-                for (long j = 1; j <= i__; ++j) {
-                    bmat[ip + j * bmat_dim1] = bmat[ip + j * bmat_dim1] + w[i__] * vlag[j] + vlag[i__] * w[j];
+            for (long i = 1; i <= n; ++i) {
+                w[i] = bmat[k + i * bmat_dim1];
+                vlag[i] = sum * xpt[k + i * xpt_dim1] + temp * xopt[i];
+                const long ip = npt + i;
+                for (long j = 1; j <= i; ++j) {
+                    bmat[ip + j * bmat_dim1] = bmat[ip + j * bmat_dim1] + w[i] * vlag[j] + vlag[i] * w[j];
                 }
             }
         }
@@ -278,10 +278,10 @@ L90:
                     bmat[k + j * bmat_dim1] += sum * zmat[k + jj * zmat_dim1];
                 }
             }
-            for (long i__ = 1; i__ <= n; ++i__) {
-                const long ip = i__ + npt;
-                temp = w[i__];
-                for (long j = 1; j <= i__; ++j) {
+            for (long i = 1; i <= n; ++i) {
+                const long ip = i + npt;
+                temp = w[i];
+                for (long j = 1; j <= i; ++j) {
                     bmat[ip + j * bmat_dim1] += temp * w[j];
                 }
             }
@@ -297,18 +297,18 @@ L90:
                 w[j] += pq[k] * xpt[k + j * xpt_dim1];
                 xpt[k + j * xpt_dim1] -= xopt[j];
             }
-            for (long i__ = 1; i__ <= j; ++i__) {
+            for (long i = 1; i <= j; ++i) {
                 ++ih;
-                hq[ih] = hq[ih] + w[i__] * xopt[j] + xopt[i__] * w[j];
-                bmat[npt + i__ + j * bmat_dim1] = bmat[npt + j + i__ * bmat_dim1];
+                hq[ih] = hq[ih] + w[i] * xopt[j] + xopt[i] * w[j];
+                bmat[npt + i + j * bmat_dim1] = bmat[npt + j + i * bmat_dim1];
             }
         }
-        for (long i__ = 1; i__ <= n; ++i__) {
-            xbase[i__] += xopt[i__];
-            xnew[i__] -= xopt[i__];
-            sl[i__] -= xopt[i__];
-            su[i__] -= xopt[i__];
-            xopt[i__] = 0.0;
+        for (long i = 1; i <= n; ++i) {
+            xbase[i] += xopt[i];
+            xnew[i] -= xopt[i];
+            sl[i] -= xopt[i];
+            su[i] -= xopt[i];
+            xopt[i] = 0.0;
         }
         xoptsq = 0.0;
     }
@@ -340,9 +340,9 @@ L190:
 
     xoptsq = 0.0;
     if (kopt != kbase) {
-        for (long i__ = 1; i__ <= n; ++i__) {
-            xopt[i__] = xpt[kopt + i__ * xpt_dim1];
-            xoptsq += square(xopt[i__]);
+        for (long i = 1; i <= n; ++i) {
+            xopt[i] = xpt[kopt + i * xpt_dim1];
+            xoptsq += square(xopt[i]);
         }
     }
     if (nf < 0) {
@@ -375,8 +375,8 @@ L210:
     altmov(n, npt, xpt + xpt_offset, xopt, bmat + bmat_offset, zmat + zmat_offset,
             ndim, sl, su, kopt, knew, adelt, xnew,
             xalt, alpha, cauchy, w, w + np - 1, w + ndim);
-    for (long i__ = 1; i__ <= n; ++i__) {
-        d__[i__] = xnew[i__] - xopt[i__];
+    for (long i = 1; i <= n; ++i) {
+        d[i] = xnew[i] - xopt[i];
     }
 
     /*     Calculate VLAG and BETA for the current choice of D. The scalar */
@@ -389,9 +389,9 @@ L230:
         sumb = 0.0;
         sum = 0.0;
         for (long j = 1; j <= n; ++j) {
-            suma += xpt[k + j * xpt_dim1] * d__[j];
+            suma += xpt[k + j * xpt_dim1] * d[j];
             sumb += xpt[k + j * xpt_dim1] * xopt[j];
-            sum += bmat[k + j * bmat_dim1] * d__[j];
+            sum += bmat[k + j * bmat_dim1] * d[j];
         }
         w[k] = suma * (0.5 * suma + sumb);
         vlag[k] = sum;
@@ -412,19 +412,19 @@ L230:
     bsum = 0.0;
     dx = 0.0;
     for (long j = 1; j <= n; ++j) {
-        dsq += square(d__[j]);
+        dsq += square(d[j]);
         sum = 0.0;
         for (long k = 1; k <= npt; ++k) {
             sum += w[k] * bmat[k + j * bmat_dim1];
         }
-        bsum += sum * d__[j];
+        bsum += sum * d[j];
         jp = npt + j;
-        for (long i__ = 1; i__ <= n; ++i__) {
-            sum += bmat[jp + i__ * bmat_dim1] * d__[i__];
+        for (long i = 1; i <= n; ++i) {
+            sum += bmat[jp + i * bmat_dim1] * d[i];
         }
         vlag[jp] = sum;
-        bsum += sum * d__[j];
-        dx += d__[j] * xopt[j];
+        bsum += sum * d[j];
+        dx += d[j] * xopt[j];
     }
     beta = dx * dx + dsq * (xoptsq + dx + dx + 0.5 * dsq) + beta - bsum;
     vlag[kopt] += 1.0;
@@ -436,9 +436,9 @@ L230:
     if (ntrits == 0) {
         denom = square(vlag[knew]) + alpha * beta;
         if (denom < cauchy && cauchy > 0.0) {
-            for (long i__ = 1; i__ <= n; ++i__) {
-                xnew[i__] = xalt[i__];
-                d__[i__] = xnew[i__] - xopt[i__];
+            for (long i = 1; i <= n; ++i) {
+                xnew[i] = xalt[i];
+                d[i] = xnew[i] - xopt[i];
             }
             cauchy = 0.0;
             goto L230;
@@ -502,13 +502,13 @@ L350:
     /*       the limit on the number of calculations of F has been reached. */
 
 L360:
-    for (long i__ = 1; i__ <= n; ++i__) {
-        x[i__] = std::min(std::max(xl[i__], xbase[i__] + xnew[i__]), xu[i__]);
-        if (xnew[i__] == sl[i__]) {
-            x[i__] = xl[i__];
+    for (long i = 1; i <= n; ++i) {
+        x[i] = std::min(std::max(xl[i], xbase[i] + xnew[i]), xu[i]);
+        if (xnew[i] == sl[i]) {
+            x[i] = xl[i];
         }
-        if (xnew[i__] == su[i__]) {
-            x[i__] = xu[i__];
+        if (xnew[i] == su[i]) {
+            x[i] = xu[i];
         }
     }
     if (nf >= maxfun) {
@@ -530,11 +530,11 @@ L360:
     vquad = 0.0;
     ih = 0;
     for (long j = 1; j <= n; ++j) {
-        vquad += d__[j] * gopt[j];
-        for (long i__ = 1; i__ <= j; ++i__) {
+        vquad += d[j] * gopt[j];
+        for (long i = 1; i <= j; ++i) {
             ++ih;
-            temp = d__[i__] * d__[j];
-            if (i__ == j) {
+            temp = d[i] * d[j];
+            if (i == j) {
                 temp = 0.5 * temp;
             }
             vquad += hq[ih] * temp;
@@ -612,9 +612,9 @@ L360:
     ih = 0;
     pqold = pq[knew];
     pq[knew] = 0.0;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        temp = pqold * xpt[knew + i__ * xpt_dim1];
-        for (long j = 1; j <= i__; ++j) {
+    for (long i = 1; i <= n; ++i) {
+        temp = pqold * xpt[knew + i * xpt_dim1];
+        for (long j = 1; j <= i; ++j) {
             ++ih;
             hq[ih] += temp * xpt[knew + j * xpt_dim1];
         }
@@ -630,9 +630,9 @@ L360:
     /*     the old XOPT that are caused by the updating of the quadratic model. */
 
     fval[knew] = f;
-    for (long i__ = 1; i__ <= n; ++i__) {
-        xpt[knew + i__ * xpt_dim1] = xnew[i__];
-        w[i__] = bmat[knew + i__ * bmat_dim1];
+    for (long i = 1; i <= n; ++i) {
+        xpt[knew + i * xpt_dim1] = xnew[i];
+        w[i] = bmat[knew + i * bmat_dim1];
     }
     for (long k = 1; k <= npt; ++k) {
         suma = 0.0;
@@ -644,12 +644,12 @@ L360:
             sumb += xpt[k + j * xpt_dim1] * xopt[j];
         }
         temp = suma * sumb;
-        for (long i__ = 1; i__ <= n; ++i__) {
-            w[i__] += temp * xpt[k + i__ * xpt_dim1];
+        for (long i = 1; i <= n; ++i) {
+            w[i] += temp * xpt[k + i * xpt_dim1];
         }
     }
-    for (long i__ = 1; i__ <= n; ++i__) {
-        gopt[i__] += diff * w[i__];
+    for (long i = 1; i <= n; ++i) {
+        gopt[i] += diff * w[i];
     }
 
     /*     Update XOPT, GOPT and KOPT if the new calculated F is less than FOPT. */
@@ -661,22 +661,22 @@ L360:
         for (long j = 1; j <= n; ++j) {
             xopt[j] = xnew[j];
             xoptsq += square(xopt[j]);
-            for (long i__ = 1; i__ <= j; ++i__) {
+            for (long i = 1; i <= j; ++i) {
                 ++ih;
-                if (i__ < j) {
-                    gopt[j] += hq[ih] * d__[i__];
+                if (i < j) {
+                    gopt[j] += hq[ih] * d[i];
                 }
-                gopt[i__] += hq[ih] * d__[j];
+                gopt[i] += hq[ih] * d[j];
             }
         }
         for (long k = 1; k <= npt; ++k) {
             temp = 0.0;
             for (long j = 1; j <= n; ++j) {
-                temp += xpt[k + j * xpt_dim1] * d__[j];
+                temp += xpt[k + j * xpt_dim1] * d[j];
             }
             temp = pq[k] * temp;
-            for (long i__ = 1; i__ <= n; ++i__) {
-                gopt[i__] += temp * xpt[k + i__ * xpt_dim1];
+            for (long i = 1; i <= n; ++i) {
+                gopt[i] += temp * xpt[k + i * xpt_dim1];
             }
         }
     }
@@ -709,23 +709,23 @@ L360:
         }
         gqsq = 0.0;
         gisq = 0.0;
-        for (long i__ = 1; i__ <= n; ++i__) {
+        for (long i = 1; i <= n; ++i) {
             sum = 0.0;
             for (long k = 1; k <= npt; ++k) {
-                sum = sum + bmat[k + i__ * bmat_dim1] * vlag[k] + xpt[k + i__
+                sum = sum + bmat[k + i * bmat_dim1] * vlag[k] + xpt[k + i
                     * xpt_dim1] * w[k];
             }
-            if (xopt[i__] == sl[i__]) {
-                gqsq += square(std::min(0.0, gopt[i__]));
+            if (xopt[i] == sl[i]) {
+                gqsq += square(std::min(0.0, gopt[i]));
                 gisq += square(std::min(0.0, sum));
-            } else if (xopt[i__] == su[i__]) {
-                gqsq += square(std::max(0.0, gopt[i__]));
+            } else if (xopt[i] == su[i]) {
+                gqsq += square(std::max(0.0, gopt[i]));
                 gisq += square(std::max(0.0, sum));
             } else {
-                gqsq += square(gopt[i__]);
+                gqsq += square(gopt[i]);
                 gisq += sum * sum;
             }
-            vlag[npt + i__] = sum;
+            vlag[npt + i] = sum;
         }
 
         /*     Test whether to replace the new quadratic model by the least Frobenius */
@@ -737,15 +737,15 @@ L360:
         }
         if (itest >= 3) {
             const long i_n = std::max(npt, nh);
-            for (long i__ = 1; i__ <= i_n; ++i__) {
-                if (i__ <= n) {
-                    gopt[i__] = vlag[npt + i__];
+            for (long i = 1; i <= i_n; ++i) {
+                if (i <= n) {
+                    gopt[i] = vlag[npt + i];
                 }
-                if (i__ <= npt) {
-                    pq[i__] = w[npt + i__];
+                if (i <= npt) {
+                    pq[i] = w[npt + i];
                 }
-                if (i__ <= nh) {
-                    hq[i__] = 0.0;
+                if (i <= nh) {
+                    hq[i] = 0.0;
                 }
                 itest = 0;
             }
@@ -837,13 +837,13 @@ L680:
     }
 L720:
     if (fval[kopt] <= fsave) {
-        for (long i__ = 1; i__ <= n; ++i__) {
-            x[i__] = std::min(std::max(xl[i__], xbase[i__] + xopt[i__]), xu[i__]);
-            if (xopt[i__] == sl[i__]) {
-                x[i__] = xl[i__];
+        for (long i = 1; i <= n; ++i) {
+            x[i] = std::min(std::max(xl[i], xbase[i] + xopt[i]), xu[i]);
+            if (xopt[i] == sl[i]) {
+                x[i] = xl[i];
             }
-            if (xopt[i__] == su[i__]) {
-                x[i__] = xu[i__];
+            if (xopt[i] == su[i]) {
+                x[i] = xu[i];
             }
         }
         f = fval[kopt];

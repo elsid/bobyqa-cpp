@@ -79,8 +79,8 @@ void prelim(
         for (long k = 1; k <= npt; ++k) {
             xpt[k + j * xpt_dim1] = 0.0;
         }
-        for (long i__ = 1; i__ <= ndim; ++i__) {
-            bmat[i__ + j * bmat_dim1] = 0.0;
+        for (long i = 1; i <= ndim; ++i) {
+            bmat[i + j * bmat_dim1] = 0.0;
         }
     }
     const long ih_n = n * np / 2;
@@ -89,8 +89,8 @@ void prelim(
     }
     for (long k = 1; k <= npt; ++k) {
         pq[k] = 0.0;
-        const long i__1 = npt - np;
-        for (long j = 1; j <= i__1; ++j) {
+        const long j_n = npt - np;
+        for (long j = 1; j <= j_n; ++j) {
             zmat[k + j * zmat_dim1] = 0.0;
         }
     }
