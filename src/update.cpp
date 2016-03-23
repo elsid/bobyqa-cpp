@@ -2,6 +2,10 @@
 
 namespace bobyqa_detail {
 
+double less_abs(double lhs, double rhs) {
+    return std::abs(lhs) < std::abs(rhs);
+}
+
 void update(
     const long n,
     const long npt,
@@ -36,13 +40,9 @@ void update(
 
     /* Function Body */
     const long nptm = npt - n - 1;
-    double ztest = 0.0;
-    for (long k = 1; k <= npt; ++k) {
-        for (long j = 1; j <= nptm; ++j) {
-            ztest = std::max(ztest, std::abs(zmat[k + j * zmat_dim1]));
-        }
-    }
-    ztest *= 1e-20;
+    const auto zmat_end = zmat + zmat_offset + nptm * npt;
+    const auto zmat_max = std::max_element(zmat + zmat_offset, zmat_end, less_abs);
+    const double ztest = zmat_max == zmat_end ? 0 : *zmat_max * 1e-20;
 
     /*     Apply the rotations that put zeros in the KNEW-th row of ZMAT. */
 
