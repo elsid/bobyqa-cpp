@@ -178,8 +178,7 @@ void rescue(
             temp = 1.0 / (ptsaux[(j << 1) + 1] - ptsaux[(j << 1) + 2]);
             bmat[jp + j * bmat_dim1] = -temp + 1.0 / ptsaux[(j << 1) + 1];
             bmat[jpn + j * bmat_dim1] = temp + 1.0 / ptsaux[(j << 1) + 2];
-            bmat[j * bmat_dim1 + 1] = -bmat[jp + j * bmat_dim1] - bmat[jpn +
-                j * bmat_dim1];
+            bmat[j * bmat_dim1 + 1] = -bmat[jp + j * bmat_dim1] - bmat[jpn + j * bmat_dim1];
             zmat[j * zmat_dim1 + 1] = sqrt_2 / std::abs(ptsaux[(j << 1) + 1] * ptsaux[(j << 1) + 2]);
             zmat[jp + j * zmat_dim1] = zmat[j * zmat_dim1 + 1] * ptsaux[(j << 1) + 2] * temp;
             zmat[jpn + j * zmat_dim1] = -zmat[j * zmat_dim1 + 1] * ptsaux[(j << 1) + 1] * temp;
@@ -241,8 +240,7 @@ L80:
         /*     branch to label 350 occurs if all the original points are reinstated. */
         /*     The nonnegative values of W(NDIM+K) are required in the search below. */
 
-        update(n, npt, bmat + bmat_offset, zmat + zmat_offset, ndim, vlag,
-                beta, denom, knew, w);
+        update(n, npt, bmat + bmat_offset, zmat + zmat_offset, ndim, vlag, beta, denom, knew, w);
         if (nrem == 0) {
             goto L350;
         }

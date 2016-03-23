@@ -253,8 +253,7 @@ L90:
                 vlag[i__] = sum * xpt[k + i__ * xpt_dim1] + temp * xopt[i__];
                 const long ip = npt + i__;
                 for (long j = 1; j <= i__; ++j) {
-                    bmat[ip + j * bmat_dim1] = bmat[ip + j * bmat_dim1] + w[
-                        i__] * vlag[j] + vlag[i__] * w[j];
+                    bmat[ip + j * bmat_dim1] = bmat[ip + j * bmat_dim1] + w[i__] * vlag[j] + vlag[i__] * w[j];
                 }
             }
         }
@@ -301,8 +300,7 @@ L90:
             for (long i__ = 1; i__ <= j; ++i__) {
                 ++ih;
                 hq[ih] = hq[ih] + w[i__] * xopt[j] + xopt[i__] * w[j];
-                bmat[npt + i__ + j * bmat_dim1] = bmat[npt + j + i__ *
-                    bmat_dim1];
+                bmat[npt + i__ + j * bmat_dim1] = bmat[npt + j + i__ * bmat_dim1];
             }
         }
         for (long i__ = 1; i__ <= n; ++i__) {

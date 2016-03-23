@@ -53,8 +53,7 @@ void update(
             const double tempb = zmat[knew + j * zmat_dim1] / temp;
             for (long i__ = 1; i__ <= npt; ++i__) {
                 const double temp = tempa * zmat[i__ + zmat_dim1] + tempb * zmat[i__ + j * zmat_dim1];
-                zmat[i__ + j * zmat_dim1] = tempa * zmat[i__ + j * zmat_dim1]
-                    - tempb * zmat[i__ + zmat_dim1];
+                zmat[i__ + j * zmat_dim1] = tempa * zmat[i__ + j * zmat_dim1] - tempb * zmat[i__ + zmat_dim1];
                 zmat[i__ + zmat_dim1] = temp;
             }
         }
@@ -76,8 +75,7 @@ void update(
     const double tempb = zmat[knew + zmat_dim1] / temp;
     const double tempa = tau / temp;
     for (long i__ = 1; i__ <= npt; ++i__) {
-        zmat[i__ + zmat_dim1] = tempa * zmat[i__ + zmat_dim1] - tempb * vlag[
-            i__];
+        zmat[i__ + zmat_dim1] = tempa * zmat[i__ + zmat_dim1] - tempb * vlag[i__];
     }
 
     /*     Finally, update the matrix BMAT. */
@@ -88,11 +86,9 @@ void update(
         const double tempa = (alpha * vlag[jp] - tau * w[jp]) / denom;
         const double tempb = (-(beta) * w[jp] - tau * vlag[jp]) / denom;
         for (long i__ = 1; i__ <= jp; ++i__) {
-            bmat[i__ + j * bmat_dim1] = bmat[i__ + j * bmat_dim1] + tempa *
-                vlag[i__] + tempb * w[i__];
+            bmat[i__ + j * bmat_dim1] = bmat[i__ + j * bmat_dim1] + tempa * vlag[i__] + tempb * w[i__];
             if (i__ > npt) {
-                bmat[jp + (i__ - npt) * bmat_dim1] = bmat[i__ + j *
-                    bmat_dim1];
+                bmat[jp + (i__ - npt) * bmat_dim1] = bmat[i__ + j * bmat_dim1];
             }
         }
     }

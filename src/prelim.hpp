@@ -188,14 +188,11 @@ L50:
                 }
             }
             bmat[nfx * bmat_dim1 + 1] = -(stepa + stepb) / (stepa * stepb);
-            bmat[nf + nfx * bmat_dim1] = -0.5 / xpt[nf - n + nfx *
-                xpt_dim1];
-            bmat[nf - n + nfx * bmat_dim1] = -bmat[nfx * bmat_dim1 + 1] -
-                bmat[nf + nfx * bmat_dim1];
+            bmat[nf + nfx * bmat_dim1] = -0.5 / xpt[nf - n + nfx * xpt_dim1];
+            bmat[nf - n + nfx * bmat_dim1] = -bmat[nfx * bmat_dim1 + 1] - bmat[nf + nfx * bmat_dim1];
             zmat[nfx * zmat_dim1 + 1] = sqrt_2 / (stepa * stepb);
             zmat[nf + nfx * zmat_dim1] = sqrt_0_5 / rhosq;
-            zmat[nf - n + nfx * zmat_dim1] = -zmat[nfx * zmat_dim1 + 1] -
-                zmat[nf + nfx * zmat_dim1];
+            zmat[nf - n + nfx * zmat_dim1] = -zmat[nfx * zmat_dim1 + 1] - zmat[nf + nfx * zmat_dim1];
         }
 
         /*     Set the off-diagonal second derivatives of the Lagrange functions and */
