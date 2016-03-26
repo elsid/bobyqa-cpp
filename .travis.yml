@@ -13,7 +13,6 @@ env:
     - C_COMPILERACHE_MAXSIZE=200M
     - C_COMPILERACHE_CPP2=1
 
-
 matrix:
   include:
 
@@ -153,13 +152,6 @@ matrix:
         - BUILD_TYPE='Debug'
         - C_COMPILER='ccache gcc-5'
         - CXX_COMPILER='ccache g++-5'
-
-
-install:
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      brew install cmake ccache
-    fi
 
 before_script:
   - export CC="${C_COMPILER}"
