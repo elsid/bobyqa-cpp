@@ -12,11 +12,19 @@ env:
     - C_COMPILERACHE_COMPRESS=1
     - C_COMPILERACHE_MAXSIZE=200M
     - C_COMPILERACHE_CPP2=1
+    - LOCAL=${HOME}/.local
+    - PATH=${LOCAL}/bin:${PATH}
+
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
 
 matrix:
   include:
 
-    # 1/ Linux Clang Builds
     - os: linux
       compiler: clang
       addons: &clang35
@@ -39,7 +47,6 @@ matrix:
         - CXX_COMPILER='ccache clang++-3.5'
         - CFLAGS='-Wno-error=unused-command-line-argument'
         - CXXFLAGS='-Wno-error=unused-command-line-argument'
-
 
     - os: linux
       compiler: clang
@@ -64,7 +71,6 @@ matrix:
         - CFLAGS='-Wno-error=unused-command-line-argument'
         - CXXFLAGS='-Wno-error=unused-command-line-argument'
 
-
     - os: linux
       compiler: clang
       addons: &clang37
@@ -88,13 +94,15 @@ matrix:
         - CFLAGS='-Wno-error=unused-command-line-argument'
         - CXXFLAGS='-Wno-error=unused-command-line-argument'
 
-
     - os: linux
       compiler: clang
-      addons: &clang38
+      addons:
         apt:
-          sources: ['llvm-toolchain-precise', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.8']
+          sources: &clang38
+            - llvm-toolchain-precise
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-3.8
       env:
         - BUILD_TYPE='Release'
         - C_COMPILER='ccache clang-3.8'
@@ -104,7 +112,14 @@ matrix:
 
     - os: linux
       compiler: clang
-      addons: *clang38
+      addons:
+        apt:
+          sources: *clang38
+          packages:
+            - clang-3.8
+            - libcurl4-openssl-dev
+            - libelf-dev
+            - libdw-dev
       env:
         - BUILD_TYPE='Debug'
         - C_COMPILER='ccache clang-3.8'
@@ -112,8 +127,6 @@ matrix:
         - CFLAGS='-Wno-error=unused-command-line-argument'
         - CXXFLAGS='-Wno-error=unused-command-line-argument'
 
-
-    # 2/ Linux GC_COMPILER Builds
     - os: linux
       compiler: gcc
       addons: &gcc49
@@ -132,7 +145,6 @@ matrix:
         - BUILD_TYPE='Debug'
         - C_COMPILER='ccache gcc-4.9'
         - CXX_COMPILER='ccache g++-4.9'
-
 
     - os: linux
       compiler: gcc
@@ -167,3 +179,13 @@ before_script:
 script:
   - make -j $(nproc)
   - ctest -V -j $(nproc)
+
+after_success:
+  - git clone https://github.com/SimonKagstrom/kcov.git
+  - mkdir kcov/build
+  - cd kcov/build
+  - cmake -DCMAKE_INSTALL_PREFIX:PATH=${LOCAL} ..
+  - make -j $(nproc)
+  - make install
+  - cd ../..
+  - kcov --coveralls-id=${TRAVIS_JOB_ID} --include-path ${TRAVIS_BUILD_DIR}/src ${TRAVIS_BUILD_DIR}/build/kcov ${TRAVIS_BUILD_DIR}/build/bin/test_bobyqa
