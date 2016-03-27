@@ -5,9 +5,18 @@
 namespace bobyqa_detail {
 
 template <class Function>
-double impl(const Function &function, long n, long npt, double *x,
-        const double *xl, const double *xu, double rhobeg, double rhoend,
-        long maxfun, double *w) {
+double impl(
+    const Function &function,
+    const long n,
+    long npt,
+    double *x,
+    const double *xl,
+    const double *xu,
+    double rhobeg,
+    double rhoend,
+    long maxfun,
+    double *w
+) {
     /*     This subroutine seeks the least value of a function of many variables, */
     /*     by applying a trust region method that forms quadratic models by */
     /*     interpolation. There is usually some freedom in the interpolation */

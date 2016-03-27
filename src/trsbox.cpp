@@ -24,8 +24,7 @@ void trsbox(
     double *const hred,
     double *const dsq,
     double *const crvmin
-)
-{
+) {
     /* Local variables */
     double ds;
     long iu;

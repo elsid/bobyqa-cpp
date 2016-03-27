@@ -17,8 +17,7 @@ void update(
     const double denom,
     const long knew,
     double *const w
-)
-{
+) {
     /*     The arrays BMAT and ZMAT are updated, as required by the new position */
     /*     of the interpolation point that has the index KNEW. The vector VLAG has */
     /*     N+NPT components, set on entry to the first NPT and last N components */

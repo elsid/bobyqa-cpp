@@ -26,8 +26,7 @@ void altmov(
     double *const glag,
     double *const hcol,
     double *const w
-)
-{
+) {
     /* Local variables */
     double gw, diff;
     long ilbd, isbd;

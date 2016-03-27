@@ -29,8 +29,7 @@ void prelim(
     const double *const su,
     long& nf,
     long& kopt
-)
-{
+) {
     /* Local variables */
     long ih, nfm;
     long nfx = 0, ipt = 0, jpt = 0;

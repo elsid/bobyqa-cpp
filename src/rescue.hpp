@@ -32,8 +32,7 @@ void rescue(
     double *const ptsaux,
     double *const ptsid,
     double *const w
-)
-{
+) {
     /* Local variables */
     long ih, jp, iq, iw;
     double xp = 0, xq = 0, den = 0;
@@ -193,8 +192,7 @@ void rescue(
 
     if (npt >= n + np) {
         for (long k = np << 1; k <= npt; ++k) {
-            iw = long((double(k - np) - 0.5) / double(n)
-            );
+            iw = long((double(k - np) - 0.5) / double(n));
             const long ip = k - np - iw * n;
             iq = ip + iw;
             if (iq > n) {

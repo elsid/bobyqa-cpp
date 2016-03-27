@@ -35,8 +35,7 @@ double bobyqb(
     double *const d,
     double *const vlag,
     double *const w
-)
-{
+) {
     /* Local variables */
     double f = 0;
     long ih, nf, jp;
