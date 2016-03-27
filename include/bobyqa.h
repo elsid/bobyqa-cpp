@@ -3,16 +3,16 @@
 
 typedef double (*BobyqaFunction)(long n, const double *x);
 typedef double (*BobyqaClosureFunction)(void *data, long n, const double *x);
-typedef double (*BobyqaClosureFunctionConst)(void *data, long n, const double *x);
+typedef double (*BobyqaClosureFunctionConst)(const void *data, long n, const double *x);
 
 typedef struct {
-    void *data;
-    BobyqaClosureFunction function;
+    void *const data;
+    const BobyqaClosureFunction function;
 } BobyqaClosure;
 
 typedef struct {
-    void *data;
-    BobyqaClosureFunctionConst function;
+    const void *const data;
+    const BobyqaClosureFunctionConst function;
 } BobyqaClosureConst;
 
 #ifdef __cplusplus
@@ -50,41 +50,41 @@ extern "C" {
  *   (NPT+5)*(NPT+N)+3*N*(N+5)/2. */
 
 double bobyqa(
-    BobyqaFunction function,
-    long n,
-    long npt,
+    const BobyqaFunction function,
+    const long n,
+    const long npt,
     double *x,
     const double *xl,
     const double *xu,
-    double rhobeg,
-    double rhoend,
-    long maxfun,
+    const double rhobeg,
+    const double rhoend,
+    const long maxfun,
     double *w
 );
 
 double bobyqa_closure(
-    BobyqaClosure *closure,
-    long n,
-    long npt,
+    BobyqaClosure *const closure,
+    const long n,
+    const long npt,
     double *x,
     const double *xl,
     const double *xu,
-    double rhobeg,
-    double rhoend,
+    const double rhobeg,
+    const double rhoend,
     long maxfun,
     double *w
 );
 
 double bobyqa_closure_const(
-    BobyqaClosureConst *closure,
-    long n,
-    long npt,
+    const BobyqaClosureConst *const closure,
+    const long n,
+    const long npt,
     double *x,
     const double *xl,
     const double *xu,
-    double rhobeg,
-    double rhoend,
-    long maxfun,
+    const double rhobeg,
+    const double rhoend,
+    const long maxfun,
     double *w
 );
 

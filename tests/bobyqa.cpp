@@ -170,13 +170,25 @@ TEST_CASE("Complex quadratic function", "[bobyqa]") {
     CHECK(variables_values == Values({{-4, -2.118033988750505525189282707287929952144622802734375}}));
 }
 
+template <class F>
+BobyqaClosureConst make_closure_const(const F &function) {
+    struct Wrap {
+        static double call(const void *data, long n, const double *values) {
+            return reinterpret_cast<const F *>(data)->operator()(n, values);
+        }
+    };
+    return BobyqaClosureConst {&function, &Wrap::call};
+}
+
 TEST_CASE("Quadratic function with jump discontinuity", "[bobyqa]") {
-    struct Function {
-        static double call(long n, const double *x) {
+    const struct Function {
+        Function() {}
+        double operator ()(long n, const double *x) const {
             REQUIRE(n == 2);
             return x[1] < 0.5 ? x[0] * x[0] + x[1] * x[1] : x[0] * x[0] + x[1] * x[1] + 10;
         }
-    };
+    } function;
+    const auto closure = make_closure_const(function);
     const long variables_count = 2;
     const long number_of_interpolation_conditions = (variables_count + 1)*(variables_count + 2)/2;
     using Values = std::array<double, variables_count>;
@@ -190,8 +202,8 @@ TEST_CASE("Quadratic function with jump discontinuity", "[bobyqa]") {
         variables_count, number_of_interpolation_conditions);
     using WorkingSpace = std::array<double, working_space_size>;
     WorkingSpace working_space;
-    const double result = bobyqa(
-        Function::call,
+    const double result = bobyqa_closure_const(
+        &closure,
         variables_count,
         number_of_interpolation_conditions,
         variables_values.data(),
@@ -219,15 +231,23 @@ BobyqaClosure make_closure(F &function) {
     return BobyqaClosure {&function, &Wrap::call};
 }
 
-TEST_CASE("Uniform random function", "[bobyqa_closure]") {
-    std::random_device device;
-    std::mt19937 generator(device());
-    std::uniform_real_distribution<> distribution(-1, 1);
-    generator.seed(0);
-    auto function = [&] (long n, const double *) {
-        REQUIRE(n == 2);
-        return distribution(generator);
-    };
+TEST_CASE("Uniform random function with funciton calls calculation", "[bobyqa_closure]") {
+    class Function {
+    public:
+        Function() {
+            generator.seed(0);
+        }
+
+        double operator ()(long n, const double *) {
+            REQUIRE(n == 2);
+            return distribution(generator);
+        }
+
+    private:
+        std::random_device device;
+        std::mt19937 generator = std::mt19937(device());
+        std::uniform_real_distribution<> distribution = std::uniform_real_distribution<>(-1, 1);
+    } function;
     auto closure = make_closure(function);
     const long variables_count = 2;
     const long number_of_interpolation_conditions = variables_count + 2;

@@ -3,15 +3,15 @@
 #include <bobyqa.h>
 
 double bobyqa(
-    BobyqaFunction function,
-    long n,
-    long npt,
+    const BobyqaFunction function,
+    const long n,
+    const long npt,
     double *x,
     const double *xl,
     const double *xu,
-    double rhobeg,
-    double rhoend,
-    long maxfun,
+    const double rhobeg,
+    const double rhoend,
+    const long maxfun,
     double *w
 ) {
     return bobyqa_detail::impl([=] (long n, const double *x) -> double {
@@ -20,35 +20,35 @@ double bobyqa(
 }
 
 double bobyqa_closure(
-    BobyqaClosure *closure,
-    long n,
-    long npt,
+    BobyqaClosure *const closure,
+    const long n,
+    const long npt,
     double *x,
     const double *xl,
     const double *xu,
-    double rhobeg,
-    double rhoend,
-    long maxfun,
+    const double rhobeg,
+    const double rhoend,
+    const long maxfun,
     double *w
 ) {
-    return bobyqa_detail::impl([=] (long n, const double *x) -> double {
+    return bobyqa_detail::impl([&] (long n, const double *x) -> double {
         return closure->function(closure->data, n, x);
     }, n, npt, x, xl, xu, rhobeg, rhoend, maxfun, w);
 }
 
 double bobyqa_closure_const(
-    BobyqaClosureConst *closure,
-    long n,
-    long npt,
+    const BobyqaClosureConst *const closure,
+    const long n,
+    const long npt,
     double *x,
     const double *xl,
     const double *xu,
-    double rhobeg,
-    double rhoend,
-    long maxfun,
+    const double rhobeg,
+    const double rhoend,
+    const long maxfun,
     double *w
 ) {
-    return bobyqa_detail::impl([=] (long n, const double *x) -> double {
+    return bobyqa_detail::impl([&] (long n, const double *x) -> double {
         return closure->function(closure->data, n, x);
     }, n, npt, x, xl, xu, rhobeg, rhoend, maxfun, w);
 }

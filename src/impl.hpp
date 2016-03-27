@@ -8,13 +8,13 @@ template <class Function>
 double impl(
     const Function &function,
     const long n,
-    long npt,
+    const long npt,
     double *x,
     const double *xl,
     const double *xu,
-    double rhobeg,
-    double rhoend,
-    long maxfun,
+    const double rhobeg,
+    const double rhoend,
+    const long maxfun,
     double *w
 ) {
     /*     This subroutine seeks the least value of a function of many variables, */
