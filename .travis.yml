@@ -165,6 +165,25 @@ matrix:
         - C_COMPILER='ccache gcc-5'
         - CXX_COMPILER='ccache g++-5'
 
+    - os: linux
+      compiler: gcc
+      addons: &gcc6
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-6']
+      env:
+        - BUILD_TYPE='Release'
+        - C_COMPILER='ccache gcc-6'
+        - CXX_COMPILER='ccache g++-6'
+
+    - os: linux
+      compiler: gcc
+      addons: *gcc6
+      env:
+        - BUILD_TYPE='Debug'
+        - C_COMPILER='ccache gcc-6'
+        - CXX_COMPILER='ccache g++-6'
+
 before_script:
   - export CC="${C_COMPILER}"
   - export CXX="${CXX_COMPILER}"
