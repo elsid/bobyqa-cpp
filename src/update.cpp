@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 
 namespace bobyqa_detail {
 

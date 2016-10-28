@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include <array>
+#include <random>
 
 #include "catch.hpp"
 
