@@ -129,7 +129,7 @@ double bobyqb(
     }
     fsave = fval[1];
     if (nf < npt) {
-        DEBUG_LOG("Return from BOBYQA because the objective function has been called "
+        BOBYQA_DEBUG_LOG("Return from BOBYQA because the objective function has been called "
                   "max_f_evals times.\n");
         goto L720;
     }
@@ -346,7 +346,7 @@ L190:
     }
     if (nf < 0) {
         nf = maxfun;
-        DEBUG_LOG("Return from BOBYQA because the objective function has been called "
+        BOBYQA_DEBUG_LOG("Return from BOBYQA because the objective function has been called "
                   "max_f_evals times.\n");
         goto L720;
     }
@@ -446,7 +446,7 @@ L230:
             if (nf > nresc) {
                 goto L190;
             }
-            DEBUG_LOG("Return from BOBYQA because of much cancellation in a denominator.\n");
+            BOBYQA_DEBUG_LOG("Return from BOBYQA because of much cancellation in a denominator.\n");
             goto L720;
         }
 
@@ -488,7 +488,7 @@ L350:
             if (nf > nresc) {
                 goto L190;
             }
-            DEBUG_LOG("Return from BOBYQA because of much cancellation in a denominator.\n");
+            BOBYQA_DEBUG_LOG("Return from BOBYQA because of much cancellation in a denominator.\n");
             goto L720;
         }
     }
@@ -511,7 +511,7 @@ L360:
         }
     }
     if (nf >= maxfun) {
-        DEBUG_LOG("Return from BOBYQA because the objective function has been called "
+        BOBYQA_DEBUG_LOG("Return from BOBYQA because the objective function has been called "
                   "max_f_evals times.\n");
         goto L720;
     }
@@ -554,7 +554,7 @@ L360:
 
     if (ntrits > 0) {
         if (vquad >= 0.0) {
-            DEBUG_LOG("Return from BOBYQA because a trust region step has failed to reduce Q.\n");
+            BOBYQA_DEBUG_LOG("Return from BOBYQA because a trust region step has failed to reduce Q.\n");
             goto L720;
         }
         ratio = (f - fopt) / vquad;

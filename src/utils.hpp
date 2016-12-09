@@ -2,15 +2,15 @@
 
 #include <cmath>
 
-#ifdef DEBUG
+#ifdef BOBYQA_DEBUG
 
 #include <cstdio>
 
-#define DEBUG_LOG(what) fprintf(stderr, what)
+#define BOBYQA_DEBUG_LOG(what) fprintf(stderr, what)
 
 #else
 
-#define DEBUG_LOG(what)
+#define BOBYQA_DEBUG_LOG(what)
 
 #endif
 

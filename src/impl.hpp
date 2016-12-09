@@ -58,7 +58,7 @@ double impl(
 
     /*     Return if the value of NPT is unacceptable. */
     if (npt < n + 2 || npt > (n + 2) * np / 2) {
-        DEBUG_LOG("Return from BOBYQA because NPT is not in the required interval.\n");
+        BOBYQA_DEBUG_LOG("Return from BOBYQA because NPT is not in the required interval.\n");
         return 0.0;
     }
 
@@ -94,7 +94,7 @@ double impl(
     for (long j = 1; j <= n; ++j) {
         const double temp = xu[j] - xl[j];
         if (temp < rhobeg + rhobeg) {
-            DEBUG_LOG("Return from BOBYQA because one of the differences in x_lower and x_upper "
+            BOBYQA_DEBUG_LOG("Return from BOBYQA because one of the differences in x_lower and x_upper "
                       "is less than 2*rho_begin.\n");
             return 0.0;
         }
