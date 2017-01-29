@@ -232,7 +232,7 @@ BobyqaClosure make_closure(F &function) {
     return BobyqaClosure {&function, &Wrap::call};
 }
 
-TEST_CASE("Uniform random function with funciton calls calculation", "[bobyqa_closure]") {
+TEST_CASE("Uniform random function with function calls calculation", "[bobyqa_closure]") {
     class Function {
     public:
         Function() {
